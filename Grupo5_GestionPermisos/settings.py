@@ -48,7 +48,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'ricardo.duran@uab.edu.bo'  # cambia esto por tu cuenta
+EMAIL_HOST_USER = 'ricardo.duran@uab.edu.bo'
 EMAIL_HOST_PASSWORD = 'zsvy lyky meqe wegq'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
@@ -70,7 +70,7 @@ TEMPLATES = [
         'DIRS': [],
         'APP_DIRS': True,
         'DIRS': [BASE_DIR / 'templates'], 
-         'DIRS': [os.path.join(BASE_DIR, 'templates')],  # ¡Importante! # aquí agregas las plantillas globales
+         'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
