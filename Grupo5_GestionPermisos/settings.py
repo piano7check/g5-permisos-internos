@@ -95,7 +95,7 @@ DATABASES = {
         'USER': 'root',# Tu usuario de la base de datos
         'PASSWORD': '',# Tu contraseña de la base de datos
         'HOST': '127.0.0.1', # La IP de la base de datos
-        'PORT': '3306', # El puerto de la base de datos
+        'PORT': '3307', # El puerto de la base de datos
     }
 }
 
