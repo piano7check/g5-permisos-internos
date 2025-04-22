@@ -1,6 +1,6 @@
-from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.core.validators import RegexValidator
+from django.contrib.auth.models import AbstractUser
+from .validators import CustomValidators
 
 ROLES = (
     ('no asignado', 'No Asignado'),
@@ -11,32 +11,20 @@ ROLES = (
 )
 
 class UsuarioPersonalizado(AbstractUser):
-    # Validadores personalizados
-    solo_letras = RegexValidator(
-        r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$',
-        'Solo se permiten letras y espacios'
-    )
-    
-    email_validator = RegexValidator(
-        r'^[a-zA-Z0-9._%+-]+@uab\.edu\.bo$',
-        'El correo debe ser del dominio @uab.edu.bo'
-    )
-
-    # Campos personalizados
     first_name = models.CharField(
         'nombre',
         max_length=150,
-        validators=[solo_letras]
+        validators=[CustomValidators.solo_letras()]
     )
     last_name = models.CharField(
         'apellido',
         max_length=150,
-        validators=[solo_letras]
+        validators=[CustomValidators.solo_letras()]
     )
     email = models.EmailField(
         'correo electrónico',
         unique=True,
-        validators=[email_validator]
+        validators=[CustomValidators.email_uab()]
     )
     tipo_usuario = models.CharField(
         max_length=20,
@@ -46,11 +34,6 @@ class UsuarioPersonalizado(AbstractUser):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name', 'username']
-
-    def clean(self):
-        super().clean()
-        if len(self.password) < 6:
-            raise ValidationError('La contraseña debe tener al menos 6 caracteres')
 
     def __str__(self):
         return f"{self.email} ({self.tipo_usuario})"
