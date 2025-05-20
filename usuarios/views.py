@@ -1,39 +1,37 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from django.shortcuts import render
-from .models import UsuarioPersonalizado
-from .serializers import UsuarioPersonalizadoSerializer
-from .email_service import enviar_correo_registro
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .decorators import rol_requerido
 
-class UsuarioCreateView(APIView):
-    def post(self, request):
-        serializer = UsuarioPersonalizadoSerializer(data=request.data)
-        if serializer.is_valid():
-            usuario = serializer.save()
-
-            # Enviar correo después de guardar
-            enviar_correo_registro(
-                usuario.first_name,
-                usuario.last_name,
-                usuario.email
-            )
-
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class UsuarioListView(APIView):
-    def get(self, request):
-        usuarios = UsuarioPersonalizado.objects.all()
-        serializer = UsuarioPersonalizadoSerializer(usuarios, many=True)
-        return Response(serializer.data)
-
-# HTML - GET /
-def vista_registro(request):
-    return render(request, 'usuarios/register.html')
+# Eliminar vistas y APIs de registro/login tradicionales, solo Google
 
 def vista_home(request):
     return render(request, 'usuarios/home.html')
 
-def vista_login(request):
-    return render(request, 'usuarios/login.html')
+def login_google(request):
+    return render(request, 'login_google.html')
+
+@login_required
+def redireccion_por_rol(request):
+    user = request.user
+    if user.tipo_usuario == 'residente':
+        return redirect('residente_home')
+    elif user.tipo_usuario == 'encargado':
+        return redirect('encargado_home')
+    elif user.tipo_usuario == 'seguridad':
+        return redirect('seguridad_home')
+    elif user.tipo_usuario == 'administrador':
+        return redirect('/admin/')
+    else:
+        return redirect('home')
+
+@rol_requerido('encargado')
+def encargado_home(request):
+    return render(request, 'usuarios/encargado_home.html')
+
+@rol_requerido('seguridad')
+def seguridad_home(request):
+    return render(request, 'usuarios/seguridad_home.html')
+
+@rol_requerido('residente')
+def residente_home(request):
+    return render(request, 'usuarios/residente_home.html')

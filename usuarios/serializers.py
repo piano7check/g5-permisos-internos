@@ -46,7 +46,7 @@ class UsuarioPersonalizadoSerializer(serializers.ModelSerializer):
 
         user = UsuarioPersonalizado.objects.create(
             username=validated_data['email'].split('@')[0],
-            tipo_usuario='no asignado',
+            tipo_usuario='residente',
             **validated_data
         )
         user.set_password(password)

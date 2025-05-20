@@ -1,0 +1,60 @@
+/* Estilos para la pantalla de inicio de sesión de Google (allauth) */
+
+.allauth-container {
+    max-width: 400px;
+    margin: 60px auto 0 auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    padding: 32px 28px 24px 28px;
+    text-align: center;
+}
+.allauth-container h1, .allauth-container h2 {
+    font-size: 2rem;
+    margin-bottom: 18px;
+    color: #222;
+}
+.allauth-container p {
+    color: #555;
+    margin-bottom: 24px;
+}
+.allauth-container .google-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    color: #444;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 10px 24px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: background 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.allauth-container .google-btn:hover {
+    background: #f7f7f7;
+    box-shadow: 0 4px 8px rgba(66,133,244,0.10);
+}
+.allauth-container .google-icon {
+    width: 22px;
+    height: 22px;
+    display: inline-block;
+    vertical-align: middle;
+}
+.allauth-container .btn {
+    margin-top: 10px;
+}
+@media (max-width: 480px) {
+    .allauth-container {
+        padding: 18px 6px 18px 6px;
+    }
+    .allauth-container .google-btn {
+        width: 100%;
+        font-size: 15px;
+        padding: 12px 0;
+    }
+}
