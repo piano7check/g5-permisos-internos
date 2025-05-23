@@ -1,0 +1,82 @@
+/* Estilos generales */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+    padding: 2rem 0;
+}
+
+/* Estilos para cards */
+.card {
+    border: none;
+    margin-bottom: 1rem;
+}
+
+.card-header {
+    background-color: transparent;
+    border-bottom: 1px solid rgba(0,0,0,.125);
+}
+
+/* Estilos para botones */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+/* Estilos para tablas */
+.table-responsive {
+    margin-bottom: 1rem;
+    border-radius: 0.25rem;
+    overflow: hidden;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    border-bottom-width: 1px;
+}
+
+/* Estilos para formularios */
+.form-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.form-text {
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+/* Estilos para notificaciones */
+.toast-container {
+    z-index: 1050;
+}
+
+/* Estilos para badges */
+.badge {
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+/* Estilos para iconos */
+.fas {
+    line-height: 1;
+}
+
+/* Utilidades */
+.shadow-hover {
+    transition: box-shadow 0.2s;
+}
+
+.shadow-hover:hover {
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+} 

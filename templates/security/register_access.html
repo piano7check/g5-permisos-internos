@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link href="{% static 'css/security.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block title %}Registrar Acceso - Sistema de Permisos{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-door-open me-2"></i>
+                    Registrar Acceso
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="accessForm" 
+                      data-record-access-url="{% url 'security:record_access' %}"
+                      data-access-history-url="{% url 'security:access_history' %}">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="resident" class="form-label">Residente</label>
+                        <select class="form-select" id="resident" name="resident" required>
+                            <option value="">Selecciona un residente</option>
+                            {% for resident in residents %}
+                            <option value="{{ resident.id }}">{{ resident.get_full_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label d-block">Tipo de Acceso</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="access_type" id="entry" value="ENTRY" required>
+                            <label class="btn btn-outline-success" for="entry">
+                                <i class="fas fa-sign-in-alt me-1"></i>
+                                Entrada
+                            </label>
+                            
+                            <input type="radio" class="btn-check" name="access_type" id="exit" value="EXIT" required>
+                            <label class="btn btn-outline-danger" for="exit">
+                                <i class="fas fa-sign-out-alt me-1"></i>
+                                Salida
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Observaciones</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="2"></textarea>
+                        <div class="form-text">Opcional: Agrega cualquier observación relevante.</div>
+                    </div>
+
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>
+                            Registrar Acceso
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Registros Recientes -->
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-light">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-history me-2"></i>
+                    Registros Recientes
+                </h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Residente</th>
+                                <th>Tipo</th>
+                                <th>Fecha y Hora</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentRecords">
+                            <!-- Los registros se agregarán dinámicamente aquí -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast para notificaciones -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong class="me-auto">Notificación</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/security/access-register.js' %}"></script>
+{% endblock %} 

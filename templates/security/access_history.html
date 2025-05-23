@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link href="{% static 'css/security.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block title %}Historial de Accesos - Sistema de Permisos{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-history me-2"></i>
+            Historial de Accesos
+        </h5>
+    </div>
+    <div class="card-body">
+        <!-- Filtros -->
+        <form method="get" class="row g-3 mb-4">
+            <div class="col-md-3">
+                <label for="date_from" class="form-label">Desde</label>
+                <input type="date" class="form-control" id="date_from" name="date_from" value="{{ request.GET.date_from }}">
+            </div>
+            <div class="col-md-3">
+                <label for="date_to" class="form-label">Hasta</label>
+                <input type="date" class="form-control" id="date_to" name="date_to" value="{{ request.GET.date_to }}">
+            </div>
+            <div class="col-md-3">
+                <label for="access_type" class="form-label">Tipo de Acceso</label>
+                <select class="form-select" id="access_type" name="access_type">
+                    <option value="">Todos</option>
+                    <option value="ENTRY" {% if request.GET.access_type == 'ENTRY' %}selected{% endif %}>Entrada</option>
+                    <option value="EXIT" {% if request.GET.access_type == 'EXIT' %}selected{% endif %}>Salida</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="resident" class="form-label">Residente</label>
+                <select class="form-select" id="resident" name="resident">
+                    <option value="">Todos</option>
+                    {% for resident in residents %}
+                    <option value="{{ resident.id }}" {% if request.GET.resident|add:"0" == resident.id %}selected{% endif %}>
+                        {{ resident.get_full_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter me-1"></i>
+                    Filtrar
+                </button>
+                <a href="{% url 'security:access_history' %}" class="btn btn-light">
+                    <i class="fas fa-times me-1"></i>
+                    Limpiar Filtros
+                </a>
+            </div>
+        </form>
+
+        {% if access_records %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Residente</th>
+                        <th>Tipo</th>
+                        <th>Fecha y Hora</th>
+                        <th>Permiso</th>
+                        <th>Guardia</th>
+                        <th>Observaciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in access_records %}
+                    <tr>
+                        <td>
+                            <div>{{ record.resident.get_full_name }}</div>
+                            <small class="text-muted">{{ record.resident.email }}</small>
+                        </td>
+                        <td>
+                            <span class="badge {% if record.access_type == 'ENTRY' %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ record.get_access_type_display }}
+                            </span>
+                        </td>
+                        <td>{{ record.timestamp|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            {% if record.permission %}
+                            <a href="{% url 'permissions:detail' record.permission.id %}" class="text-decoration-none">
+                                <i class="fas fa-file-alt me-1"></i>
+                                Ver Permiso
+                            </a>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ record.security_guard.get_full_name }}</td>
+                        <td>
+                            {% if record.notes %}
+                            <span class="text-muted">{{ record.notes }}</span>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        {% if is_paginated %}
+        <nav aria-label="Navegación de páginas" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+
+                <li class="page-item disabled">
+                    <span class="page-link">
+                        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                    </span>
+                </li>
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        {% else %}
+        <div class="text-center py-4">
+            <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+            <p class="text-muted">No hay registros de acceso que coincidan con los filtros.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,55 @@
+/* Estilos para botones de tipo de acceso */
+.btn-check:checked + .btn-outline-success {
+    color: #fff;
+    background-color: #198754;
+    border-color: #198754;
+}
+
+.btn-check:checked + .btn-outline-danger {
+    color: #fff;
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+/* Estilos para la tabla de registros */
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.075);
+    cursor: pointer;
+}
+
+/* Estilos para el toast de notificaciones */
+.toast {
+    min-width: 300px;
+}
+
+.toast-header.bg-success,
+.toast-header.bg-danger {
+    color: white;
+}
+
+/* Estilos para los filtros */
+.filter-form {
+    background-color: #f8f9fa;
+    border-radius: 0.25rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Estilos para badges */
+.badge {
+    font-size: 0.875rem;
+    padding: 0.35em 0.65em;
+}
+
+/* Estilos para la paginación */
+.pagination {
+    margin-bottom: 0;
+}
+
+.page-link {
+    padding: 0.375rem 0.75rem;
+}
+
+.page-link i {
+    font-size: 0.875rem;
+} 

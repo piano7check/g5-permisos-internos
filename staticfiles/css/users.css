@@ -1,0 +1,28 @@
+/* Estilos para el perfil de usuario */
+.avatar-circle {
+    width: 120px;
+    height: 120px;
+    background-color: #f8f9fa;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+/* Estilos para las estadísticas */
+.stats-card {
+    transition: transform 0.2s;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Estilos para campos de formulario */
+.form-control-plaintext {
+    padding: 0.375rem 0;
+    margin-bottom: 0;
+    font-size: 1rem;
+    line-height: 1.5;
+} 

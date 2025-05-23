@@ -4,35 +4,54 @@ from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.fields import GenericRelation
 from a_permissions.models import Permission
 from a_audit.models import AuditLog
+from django.utils import timezone
 
 class AccessRecord(models.Model):
-    class RecordType(models.TextChoices):
-        EXIT = 'EXIT', 'Salida'
-        ENTRY = 'ENTRY', 'Entrada'
-    
-    permission = models.ForeignKey(
-        Permission,
+    ACCESS_TYPES = [
+        ('ENTRY', 'Entrada'),
+        ('EXIT', 'Salida'),
+    ]
+
+    resident = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='access_records',
-        limit_choices_to={'status': 'APPROVED'}
+        limit_choices_to={'role': 'RESIDENTE'},
+        verbose_name='Residente'
     )
     
-    security_officer = models.ForeignKey(
+    security_guard = models.ForeignKey(
         settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='recorded_accesses',
+        limit_choices_to={'role': 'SEGURIDAD'},
+        verbose_name='Guardia de Seguridad'
+    )
+    
+    timestamp = models.DateTimeField(
+        default=timezone.now,
+        verbose_name='Fecha y Hora'
+    )
+    
+    access_type = models.CharField(
+        max_length=5,
+        choices=ACCESS_TYPES,
+        verbose_name='Tipo de Acceso'
+    )
+    
+    notes = models.TextField(
+        blank=True,
+        verbose_name='Observaciones'
+    )
+    
+    permission = models.ForeignKey(
+        'a_permissions.Permission',
         on_delete=models.SET_NULL,
         null=True,
-        related_name='recorded_accesses',
-        limit_choices_to={'role': 'SEGURIDAD'}
+        blank=True,
+        related_name='access_records',
+        verbose_name='Permiso Asociado'
     )
-    
-    record_type = models.CharField(
-        'Tipo de Registro',
-        max_length=10,
-        choices=RecordType.choices
-    )
-    
-    timestamp = models.DateTimeField('Fecha y Hora', auto_now_add=True)
-    notes = models.TextField('Notas', blank=True)
     
     # Relación con el log de auditoría
     audit_logs = GenericRelation(AuditLog)
@@ -43,7 +62,7 @@ class AccessRecord(models.Model):
         ordering = ['-timestamp']
     
     def __str__(self):
-        return f"{self.get_record_type_display()} - {self.permission.resident.get_full_name()} - {self.timestamp}"
+        return f"{self.get_access_type_display()} - {self.resident.get_full_name()} - {self.timestamp.strftime('%d/%m/%Y %H:%M')}"
     
     def clean(self):
         # Validar que el permiso esté vigente
@@ -60,5 +79,16 @@ class AccessRecord(models.Model):
                     })
     
     def save(self, *args, **kwargs):
+        # Si es una entrada y hay un permiso activo, lo vinculamos
+        if self.access_type == 'ENTRY' and not self.permission:
+            active_permission = Permission.objects.filter(
+                resident=self.resident,
+                status='APPROVED',
+                start_date__lte=timezone.now(),
+                end_date__gte=timezone.now()
+            ).first()
+            if active_permission:
+                self.permission = active_permission
+        
         self.clean()
         super().save(*args, **kwargs)

@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Mis Permisos - Sistema de Permisos{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-list me-2"></i>
+            Mis Permisos
+        </h5>
+        <a href="{% url 'permissions:request' %}" class="btn btn-light btn-sm">
+            <i class="fas fa-plus me-1"></i>
+            Solicitar Permiso
+        </a>
+    </div>
+    <div class="card-body">
+        {% if permissions %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Fecha Solicitud</th>
+                        <th>Período</th>
+                        <th>Motivo</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for permission in permissions %}
+                    <tr>
+                        <td>{{ permission.created_at|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            <div>Inicio: {{ permission.start_date|date:"d/m/Y H:i" }}</div>
+                            <div>Fin: {{ permission.end_date|date:"d/m/Y H:i" }}</div>
+                        </td>
+                        <td>{{ permission.reason|truncatechars:50 }}</td>
+                        <td>
+                            <span class="badge {% if permission.status == 'APPROVED' %}bg-success{% elif permission.status == 'REJECTED' %}bg-danger{% else %}bg-warning{% endif %}">
+                                {{ permission.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{% url 'permissions:detail' permission.id %}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+            <p class="text-muted">No tienes permisos solicitados.</p>
+            <a href="{% url 'permissions:request' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>
+                Solicitar Permiso
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 
