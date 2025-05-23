@@ -5,16 +5,19 @@ from django.contrib.contenttypes.fields import GenericRelation
 from a_audit.models import AuditLog
 
 class Permission(models.Model):
-    class Status(models.TextChoices):
-        PENDING = 'PENDING', 'Pendiente'
-        APPROVED = 'APPROVED', 'Aprobado'
-        REJECTED = 'REJECTED', 'Rechazado'
+    STATUS_CHOICES = [
+        ('PENDING', 'Pendiente'),
+        ('APPROVED', 'Aprobado'),
+        ('REJECTED', 'Rechazado'),
+        ('COMPLETED', 'Completado'),
+    ]
     
     resident = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='permissions_requested',
-        limit_choices_to={'role': 'RESIDENTE'}
+        related_name='permissions',
+        limit_choices_to={'role': 'RESIDENTE'},
+        verbose_name='Residente'
     )
     
     approver = models.ForeignKey(
@@ -32,8 +35,8 @@ class Permission(models.Model):
     end_date = models.DateTimeField('Fecha de fin')
     status = models.CharField(
         max_length=20,
-        choices=Status.choices,
-        default=Status.PENDING
+        choices=STATUS_CHOICES,
+        default='PENDING'
     )
     
     # Campos de auditoría

@@ -8,22 +8,70 @@ from .models import AccessRecord
 from a_users.models import User
 from a_permissions.models import Permission
 import json
+from django.db import models
 
 # Create your views here.
 
-class RegisterAccessView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+class RegisterAccessView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     template_name = 'security/register_access.html'
+    model = Permission
+    context_object_name = 'permissions'
+    paginate_by = 20
 
     def test_func(self):
         return self.request.user.role == 'SEGURIDAD'
 
+    def get_queryset(self):
+        queryset = Permission.objects.all().select_related('resident')
+
+        # Filtro por estado
+        status = self.request.GET.get('status')
+        if status in ['PENDING', 'APPROVED', 'REJECTED', 'COMPLETED']:
+            queryset = queryset.filter(status=status)
+        else:
+            # Por defecto mostrar los permisos activos y pendientes
+            queryset = queryset.filter(
+                Q(status='APPROVED') |
+                Q(status='PENDING'),
+                start_date__lte=timezone.now() + timezone.timedelta(days=1),  # Incluir permisos que empiezan en las próximas 24 horas
+                end_date__gte=timezone.now()  # Solo permisos que no han expirado
+            )
+
+        # Filtro por área (opcional)
+        area = self.request.GET.get('area')
+        if area in ['MALE', 'FEMALE']:
+            queryset = queryset.filter(resident__controlled_area=area)
+
+        # Ordenar por estado y fecha
+        return queryset.order_by(
+            models.Case(
+                models.When(status='APPROVED', then=0),
+                models.When(status='PENDING', then=1),
+                models.When(status='COMPLETED', then=2),
+                models.When(status='REJECTED', then=3),
+                default=4,
+                output_field=models.IntegerField(),
+            ),
+            'start_date'
+        )
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Obtener residentes del área controlada por el guardia
-        context['residents'] = User.objects.filter(
-            role='RESIDENTE',
-            controlled_area=self.request.user.controlled_area
-        )
+        context['status_choices'] = Permission.STATUS_CHOICES
+        context['area_choices'] = [
+            ('MALE', 'Residencia Varones'),
+            ('FEMALE', 'Residencia Mujeres')
+        ]
+        
+        # Obtener el último registro de acceso para cada permiso
+        permissions_with_access = {}
+        for permission in context['permissions']:
+            last_access = AccessRecord.objects.filter(
+                permission=permission
+            ).order_by('-timestamp').first()
+            permissions_with_access[permission.id] = last_access
+        
+        context['last_accesses'] = permissions_with_access
         return context
 
 class AccessHistoryView(LoginRequiredMixin, UserPassesTestMixin, ListView):
@@ -75,56 +123,45 @@ class RecordAccessView(LoginRequiredMixin, UserPassesTestMixin, View):
     def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body)
-            resident_id = data.get('resident_id')
+            permission_id = data.get('permission_id')
             access_type = data.get('access_type')
             notes = data.get('notes', '')
 
-            if not resident_id or not access_type:
-                return JsonResponse({
-                    'status': 'error',
-                    'message': 'Faltan datos requeridos'
-                }, status=400)
-
-            resident = get_object_or_404(
-                User,
-                id=resident_id,
-                role='RESIDENTE',
-                controlled_area=request.user.controlled_area
+            permission = get_object_or_404(
+                Permission,
+                id=permission_id,
+                status='APPROVED'
             )
-
-            # Verificar si hay un permiso activo para entradas
-            active_permission = None
-            if access_type == 'ENTRY':
-                active_permission = Permission.objects.filter(
-                    resident=resident,
-                    status='APPROVED',
-                    start_date__lte=timezone.now(),
-                    end_date__gte=timezone.now()
-                ).first()
-
-                if not active_permission:
-                    return JsonResponse({
-                        'status': 'error',
-                        'message': 'El residente no tiene un permiso activo para entrar'
-                    }, status=400)
 
             # Crear el registro de acceso
             access_record = AccessRecord.objects.create(
-                resident=resident,
+                resident=permission.resident,
                 security_guard=request.user,
                 access_type=access_type,
                 notes=notes,
-                permission=active_permission
+                permission=permission
             )
+
+            # Si es una entrada y ya había una salida previa, marcar como completado
+            if access_type == 'ENTRY':
+                previous_exit = AccessRecord.objects.filter(
+                    permission=permission,
+                    access_type='EXIT'
+                ).exists()
+                
+                if previous_exit:
+                    permission.status = 'COMPLETED'
+                    permission.save()
 
             return JsonResponse({
                 'status': 'success',
                 'message': 'Acceso registrado correctamente',
                 'record': {
                     'id': access_record.id,
-                    'resident_name': resident.get_full_name(),
+                    'resident_name': permission.resident.get_full_name(),
                     'timestamp': access_record.timestamp.strftime('%d/%m/%Y %H:%M'),
-                    'access_type': access_record.get_access_type_display()
+                    'access_type': access_record.get_access_type_display(),
+                    'permission_status': permission.status
                 }
             })
 

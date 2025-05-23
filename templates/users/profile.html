@@ -13,39 +13,75 @@
                 </h5>
             </div>
             <div class="card-body">
-                <div class="row">
-                    <div class="col-md-4 text-center mb-3">
-                        <div class="avatar-circle mb-3">
-                            <i class="fas fa-user fa-4x text-primary"></i>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.first_name.id_for_label }}" class="form-label">{{ form.first_name.label }}</label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.first_name.errors.0 }}
+                            </div>
+                            {% endif %}
                         </div>
-                        <h4>{{ user.get_full_name }}</h4>
-                        <p class="text-muted">{{ user.get_role_display }}</p>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.last_name.id_for_label }}" class="form-label">{{ form.last_name.label }}</label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.last_name.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
-                    <div class="col-md-8">
-                        <div class="mb-3">
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.phone.id_for_label }}" class="form-label">{{ form.phone.label }}</label>
+                            {{ form.phone }}
+                            {% if form.phone.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.phone.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.gender.id_for_label }}" class="form-label">{{ form.gender.label }}</label>
+                            {{ form.gender }}
+                            {% if form.gender.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.gender.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
                             <label class="form-label text-muted">Email:</label>
                             <p class="form-control-plaintext">{{ user.email }}</p>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label text-muted">Teléfono:</label>
-                            <p class="form-control-plaintext">{{ user.phone|default:"No especificado" }}</p>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label text-muted">Género:</label>
-                            <p class="form-control-plaintext">{{ user.get_gender_display|default:"No especificado" }}</p>
-                        </div>
-                        {% if user.is_residente or user.is_encargado %}
-                        <div class="mb-3">
-                            <label class="form-label text-muted">Área:</label>
-                            <p class="form-control-plaintext">{{ user.get_controlled_area_display }}</p>
-                        </div>
-                        {% endif %}
-                        <div class="mb-3">
-                            <label class="form-label text-muted">Fecha de registro:</label>
-                            <p class="form-control-plaintext">{{ user.date_joined|date:"d/m/Y" }}</p>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted">Rol:</label>
+                            <p class="form-control-plaintext">{{ user.get_role_display }}</p>
                         </div>
                     </div>
-                </div>
+
+                    {% if user.is_residente or user.is_encargado %}
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Área:</label>
+                        <p class="form-control-plaintext">{{ user.get_controlled_area_display }}</p>
+                    </div>
+                    {% endif %}
+
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>
+                            Guardar Cambios
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
 

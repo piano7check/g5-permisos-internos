@@ -5,12 +5,252 @@
 <link href="{% static 'css/permissions.css' %}" rel="stylesheet">
 {% endblock %}
 
-{% block title %}Permisos - Sistema de Permisos{% endblock %}
+{% block title %}Lista de Permisos - Sistema de Permisos{% endblock %}
 
 {% block content %}
-// ... existing code ...
+<div class="container mt-4">
+    <h2>Gestión de Permisos</h2>
+    
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="status" class="form-label">Estado</label>
+                    <select name="status" id="status" class="form-select">
+                        <option value="">Todos</option>
+                        {% for status, label in status_choices %}
+                        <option value="{{ status }}" {% if request.GET.status == status %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="date" class="form-label">Fecha</label>
+                    <input type="date" class="form-control" id="date" name="date" value="{{ request.GET.date }}">
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                    <a href="{% url 'permissions:permission_list' %}" class="btn btn-secondary ms-2">Limpiar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de Permisos -->
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Residente</th>
+                    <th>Motivo</th>
+                    <th>Fecha Inicio</th>
+                    <th>Fecha Fin</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for permission in permissions %}
+                <tr>
+                    <td>{{ permission.resident.get_full_name }}</td>
+                    <td>{{ permission.reason|truncatechars:50 }}</td>
+                    <td>{{ permission.start_date|date:"d/m/Y H:i" }}</td>
+                    <td>{{ permission.end_date|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        <span class="badge bg-{% if permission.status == 'APPROVED' %}success{% elif permission.status == 'PENDING' %}warning{% elif permission.status == 'REJECTED' %}danger{% elif permission.status == 'COMPLETED' %}info{% endif %}">
+                            {{ permission.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if permission.status == 'PENDING' %}
+                        <button class="btn btn-success btn-sm approve-permission" data-permission-id="{{ permission.id }}">
+                            <i class="fas fa-check"></i> Aprobar
+                        </button>
+                        <button class="btn btn-danger btn-sm reject-permission" data-permission-id="{{ permission.id }}">
+                            <i class="fas fa-times"></i> Rechazar
+                        </button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">No hay permisos para mostrar</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Paginación -->
+    {% if is_paginated %}
+    <nav aria-label="Navegación de páginas">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.date %}&date={{ request.GET.date }}{% endif %}">Anterior</a>
+            </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.date %}&date={{ request.GET.date }}{% endif %}">{{ num }}</a>
+            </li>
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.date %}&date={{ request.GET.date }}{% endif %}">Siguiente</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+<!-- Modal de Rechazo -->
+<div class="modal fade" id="rejectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Motivo de Rechazo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="rejection_reason" class="form-label">Por favor, explique el motivo del rechazo:</label>
+                    <textarea class="form-control" id="rejection_reason" rows="3" required></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmReject">Confirmar Rechazo</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/permissions/permission-actions.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const rejectModal = new bootstrap.Modal(document.getElementById('rejectModal'));
+    let currentPermissionId = null;
+
+    // Función para aprobar permiso
+    function approvePermission(permissionId) {
+        fetch(`{% url 'permissions:approve' 0 %}`.replace('0', permissionId), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: 'Permiso aprobado correctamente',
+                    showConfirmButton: false,
+                    timer: 1500
+                }).then(() => {
+                    window.location.reload();
+                });
+            } else {
+                throw new Error(data.message);
+            }
+        })
+        .catch(error => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message
+            });
+        });
+    }
+
+    // Función para rechazar permiso
+    function rejectPermission(permissionId, reason) {
+        fetch(`{% url 'permissions:reject' 0 %}`.replace('0', permissionId), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                rejection_reason: reason
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: 'Permiso rechazado correctamente',
+                    showConfirmButton: false,
+                    timer: 1500
+                }).then(() => {
+                    window.location.reload();
+                });
+            } else {
+                throw new Error(data.message);
+            }
+        })
+        .catch(error => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message
+            });
+        });
+    }
+
+    // Event listeners para botones de aprobar
+    document.querySelectorAll('.approve-permission').forEach(button => {
+        button.addEventListener('click', function() {
+            const permissionId = this.dataset.permissionId;
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "¿Deseas aprobar este permiso?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, aprobar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    approvePermission(permissionId);
+                }
+            });
+        });
+    });
+
+    // Event listeners para botones de rechazar
+    document.querySelectorAll('.reject-permission').forEach(button => {
+        button.addEventListener('click', function() {
+            currentPermissionId = this.dataset.permissionId;
+            document.getElementById('rejection_reason').value = '';
+            rejectModal.show();
+        });
+    });
+
+    // Event listener para confirmar rechazo
+    document.getElementById('confirmReject').addEventListener('click', function() {
+        const reason = document.getElementById('rejection_reason').value;
+        if (!reason.trim()) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Debes proporcionar un motivo de rechazo'
+            });
+            return;
+        }
+        rejectModal.hide();
+        rejectPermission(currentPermissionId, reason);
+    });
+});
+</script>
 {% endblock %} 

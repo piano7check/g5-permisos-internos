@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load core_tags %}
 
 {% block extra_css %}
 <link href="{% static 'css/security.css' %}" rel="stylesheet">
@@ -8,105 +9,220 @@
 {% block title %}Registrar Acceso - Sistema de Permisos{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-door-open me-2"></i>
-                    Registrar Acceso
-                </h5>
-            </div>
-            <div class="card-body">
-                <form id="accessForm" 
-                      data-record-access-url="{% url 'security:record_access' %}"
-                      data-access-history-url="{% url 'security:access_history' %}">
-                    {% csrf_token %}
-                    
-                    <div class="mb-3">
-                        <label for="resident" class="form-label">Residente</label>
-                        <select class="form-select" id="resident" name="resident" required>
-                            <option value="">Selecciona un residente</option>
-                            {% for resident in residents %}
-                            <option value="{{ resident.id }}">{{ resident.get_full_name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label d-block">Tipo de Acceso</label>
-                        <div class="btn-group w-100" role="group">
-                            <input type="radio" class="btn-check" name="access_type" id="entry" value="ENTRY" required>
-                            <label class="btn btn-outline-success" for="entry">
-                                <i class="fas fa-sign-in-alt me-1"></i>
-                                Entrada
-                            </label>
-                            
-                            <input type="radio" class="btn-check" name="access_type" id="exit" value="EXIT" required>
-                            <label class="btn btn-outline-danger" for="exit">
-                                <i class="fas fa-sign-out-alt me-1"></i>
-                                Salida
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="notes" class="form-label">Observaciones</label>
-                        <textarea class="form-control" id="notes" name="notes" rows="2"></textarea>
-                        <div class="form-text">Opcional: Agrega cualquier observación relevante.</div>
-                    </div>
-
-                    <div class="text-end">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-1"></i>
-                            Registrar Acceso
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Registros Recientes -->
-        <div class="card shadow-sm mt-4">
-            <div class="card-header bg-light">
-                <h6 class="card-title mb-0">
-                    <i class="fas fa-history me-2"></i>
-                    Registros Recientes
-                </h6>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>Residente</th>
-                                <th>Tipo</th>
-                                <th>Fecha y Hora</th>
-                            </tr>
-                        </thead>
-                        <tbody id="recentRecords">
-                            <!-- Los registros se agregarán dinámicamente aquí -->
-                        </tbody>
-                    </table>
+<div class="container mt-4">
+    <h2>Registro de Accesos</h2>
+    
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="status" class="form-label">Estado</label>
+                    <select name="status" id="status" class="form-select">
+                        <option value="">Todos</option>
+                        {% for status, label in status_choices %}
+                        <option value="{{ status }}" {% if request.GET.status == status %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
-            </div>
+                <div class="col-md-3">
+                    <label for="area" class="form-label">Área</label>
+                    <select name="area" id="area" class="form-select">
+                        <option value="">Todas</option>
+                        {% for area_code, area_name in area_choices %}
+                        <option value="{{ area_code }}" {% if request.GET.area == area_code %}selected{% endif %}>{{ area_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="date" class="form-label">Fecha</label>
+                    <input type="date" class="form-control" id="date" name="date" value="{{ request.GET.date }}">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                    <a href="{% url 'security:register_access' %}" class="btn btn-secondary ms-2">Limpiar</a>
+                </div>
+            </form>
         </div>
     </div>
+
+    <!-- Lista de Permisos -->
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Residente</th>
+                    <th>Motivo</th>
+                    <th>Fecha Inicio</th>
+                    <th>Fecha Fin</th>
+                    <th>Estado</th>
+                    <th>Último Acceso</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for permission in permissions %}
+                <tr>
+                    <td>{{ permission.resident.get_full_name }}</td>
+                    <td>{{ permission.reason|truncatechars:30 }}</td>
+                    <td>{{ permission.start_date|date:"d/m/Y H:i" }}</td>
+                    <td>{{ permission.end_date|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        <span class="badge bg-{% if permission.status == 'APPROVED' %}success{% elif permission.status == 'PENDING' %}warning{% elif permission.status == 'REJECTED' %}danger{% elif permission.status == 'COMPLETED' %}info{% endif %}">
+                            {{ permission.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        {% with last_access=last_accesses|get_item:permission.id %}
+                        {% if last_access %}
+                            <span class="badge bg-{% if last_access.access_type == 'ENTRY' %}success{% else %}danger{% endif %}">
+                                {{ last_access.get_access_type_display }}
+                            </span>
+                            <small class="text-muted">{{ last_access.timestamp|date:"d/m/Y H:i" }}</small>
+                        {% else %}
+                            <span class="text-muted">Sin registros</span>
+                        {% endif %}
+                        {% endwith %}
+                    </td>
+                    <td>
+                        {% if permission.status == 'APPROVED' %}
+                            {% with last_access=last_accesses|get_item:permission.id %}
+                            {% if not last_access or last_access.access_type == 'ENTRY' %}
+                                <button class="btn btn-danger btn-sm register-exit" data-permission-id="{{ permission.id }}" data-type="EXIT">
+                                    <i class="fas fa-sign-out-alt"></i> Salida
+                                </button>
+                            {% elif last_access.access_type == 'EXIT' %}
+                                <button class="btn btn-success btn-sm register-entry" data-permission-id="{{ permission.id }}" data-type="ENTRY">
+                                    <i class="fas fa-sign-in-alt"></i> Entrada
+                                </button>
+                            {% endif %}
+                            {% endwith %}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center">No hay permisos para mostrar</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Paginación -->
+    {% if is_paginated %}
+    <nav aria-label="Navegación de páginas">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.area %}&area={{ request.GET.area }}{% endif %}{% if request.GET.date %}&date={{ request.GET.date }}{% endif %}">Anterior</a>
+            </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.area %}&area={{ request.GET.area }}{% endif %}{% if request.GET.date %}&date={{ request.GET.date }}{% endif %}">{{ num }}</a>
+            </li>
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.area %}&area={{ request.GET.area }}{% endif %}{% if request.GET.date %}&date={{ request.GET.date }}{% endif %}">Siguiente</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
 </div>
 
-<!-- Toast para notificaciones -->
-<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-    <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-            <i class="fas fa-info-circle me-2"></i>
-            <strong class="me-auto">Notificación</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+<!-- Modal de Confirmación -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Registro</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de registrar este acceso?</p>
+                <div class="mb-3">
+                    <label for="notes" class="form-label">Observaciones:</label>
+                    <textarea class="form-control" id="notes" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="confirmAccess">Confirmar</button>
+            </div>
         </div>
-        <div class="toast-body"></div>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/security/access-register.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+    let currentPermissionId = null;
+    let currentAccessType = null;
+
+    // Función para registrar acceso
+    function registerAccess(permissionId, accessType, notes) {
+        fetch('{% url "security:record_access" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                permission_id: permissionId,
+                access_type: accessType,
+                notes: notes
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Mostrar mensaje de éxito
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: data.message,
+                    showConfirmButton: false,
+                    timer: 1500
+                }).then(() => {
+                    // Recargar la página para actualizar la lista
+                    window.location.reload();
+                });
+            } else {
+                throw new Error(data.message);
+            }
+        })
+        .catch(error => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message
+            });
+        });
+    }
+
+    // Event listeners para botones de entrada/salida
+    document.querySelectorAll('.register-entry, .register-exit').forEach(button => {
+        button.addEventListener('click', function() {
+            currentPermissionId = this.dataset.permissionId;
+            currentAccessType = this.dataset.type;
+            document.getElementById('notes').value = '';
+            modal.show();
+        });
+    });
+
+    // Event listener para botón de confirmación
+    document.getElementById('confirmAccess').addEventListener('click', function() {
+        const notes = document.getElementById('notes').value;
+        modal.hide();
+        registerAccess(currentPermissionId, currentAccessType, notes);
+    });
+});
+</script>
 {% endblock %} 

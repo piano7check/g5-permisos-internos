@@ -16,15 +16,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.views.generic import TemplateView
-from django.contrib.auth.decorators import login_required
+from django.views.generic import RedirectView
 from a_core.views import HomeView
 
 urlpatterns = [
     # Admin
     path('admin/', admin.site.urls),
     
-    # Autenticación
+    # Autenticación - Redirigir todo a Google OAuth
+    path('accounts/login/', RedirectView.as_view(url='/accounts/google/login/', permanent=True), name='account_login'),
+    path('accounts/signup/', RedirectView.as_view(url='/accounts/google/login/', permanent=True), name='account_signup'),
+    path('accounts/3rdparty/signup/', RedirectView.as_view(url='/accounts/google/login/', permanent=True)),
     path('accounts/', include('allauth.urls')),
     
     # Apps del proyecto

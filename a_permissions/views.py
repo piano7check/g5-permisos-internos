@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from django.views.generic import TemplateView, ListView, DetailView, View
+from django.views.generic import TemplateView, ListView, DetailView, View, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import JsonResponse
 from django.utils import timezone
@@ -8,6 +8,7 @@ from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView
 from .models import Permission
 import json
+from django.db.models import Q
 
 # Create your views here.
 
@@ -117,3 +118,44 @@ class RejectPermissionView(LoginRequiredMixin, UserPassesTestMixin, View):
         # Aquí podrías enviar un correo electrónico al residente
         
         return JsonResponse({'status': 'success'})
+
+class PermissionListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    model = Permission
+    template_name = 'permissions/permission_list.html'
+    context_object_name = 'permissions'
+    paginate_by = 20
+
+    def test_func(self):
+        return self.request.user.role == 'ENCARGADO'
+
+    def get_queryset(self):
+        queryset = Permission.objects.filter(
+            resident__controlled_area=self.request.user.controlled_area
+        ).select_related('resident', 'approver')
+
+        # Filtro por estado
+        status = self.request.GET.get('status')
+        if status in ['PENDING', 'APPROVED', 'REJECTED', 'COMPLETED']:
+            queryset = queryset.filter(status=status)
+        else:
+            # Por defecto mostrar pendientes primero
+            queryset = queryset.filter(status='PENDING')
+
+        # Filtro por fecha
+        date = self.request.GET.get('date')
+        if date:
+            queryset = queryset.filter(
+                Q(start_date__date=date) | 
+                Q(end_date__date=date)
+            )
+
+        # Ordenar por estado y fecha
+        return queryset.order_by(
+            'status',
+            '-created_at'
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['status_choices'] = Permission.STATUS_CHOICES
+        return context

@@ -54,9 +54,15 @@ class User(AbstractUser):
         return f"{self.get_full_name()} ({self.email})"
     
     def save(self, *args, **kwargs):
-        # Si es residente, el área controlada debe coincidir con su género
+        # Asignar área controlada según el rol y género
         if self.role == self.Roles.RESIDENTE and self.gender:
+            # Para residentes, asignar según género
             self.controlled_area = self.Area.MALE_RESIDENCE if self.gender == self.Gender.MALE else self.Area.FEMALE_RESIDENCE
+        elif self.role == self.Roles.SEGURIDAD:
+            # Para seguridad, no asignar área controlada
+            self.controlled_area = None
+        # Para encargados, mantener el área asignada manualmente
+        
         super().save(*args, **kwargs)
     
     @property

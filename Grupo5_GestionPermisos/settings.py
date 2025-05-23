@@ -30,7 +30,28 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-+y&^ew3rinq1tye=yv^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['172.16.101.76', '127.0.0.1']
+# Configuración de dominio local
+LOCAL_DOMAIN = os.getenv('LOCAL_DOMAIN', 'localhost:8000')
+USE_NGROK = os.getenv('USE_NGROK', 'False') == 'True'
+
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '0.0.0.0',
+    LOCAL_DOMAIN,
+    '.ngrok-free.app',  # Para desarrollo con ngrok
+    '7b57-181-115-166-101.ngrok-free.app',  # Tu URL específica de ngrok
+]
+
+# Configuración de CSRF
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:8000',
+    'https://localhost:8000',
+    'http://127.0.0.1:8000',
+    'https://127.0.0.1:8000',
+    f'https://{LOCAL_DOMAIN}',
+    'https://7b57-181-115-166-101.ngrok-free.app',
+]
 
 
 # Application definition
@@ -53,7 +74,6 @@ INSTALLED_APPS = [
     
     # Local apps
     'a_core.apps.ACoreConfig',
-    'a_authentication.apps.AAuthenticationConfig',
     'a_users.apps.AUsersConfig',
     'a_permissions.apps.APermissionsConfig',
     'a_security.apps.ASecurityConfig',
@@ -63,20 +83,75 @@ INSTALLED_APPS = [
 SITE_ID = 1
 
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
+    'django.contrib.auth.backends.ModelBackend',
 ]
 
-# Configuración de allauth
-ACCOUNT_LOGIN_METHODS = {'email'}
-ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
-ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
-SOCIALACCOUNT_AUTO_SIGNUP = True
-SOCIALACCOUNT_EMAIL_REQUIRED = True
-
+# Configuración de Google OAuth
 SOCIAL_AUTH_GOOGLE_CLIENT_ID = os.getenv('SOCIAL_AUTH_GOOGLE_CLIENT_ID')
 SOCIAL_AUTH_GOOGLE_SECRET = os.getenv('SOCIAL_AUTH_GOOGLE_SECRET')
 
+# Configuración de sesión y autenticación
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/login/'
+SESSION_COOKIE_AGE = 1209600  # 2 semanas
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_COOKIE_SECURE = False  # Cambiar a True en producción
+
+# Configuración de allauth
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_EMAIL_REQUIRED = True
+
+# Nuevas configuraciones de allauth
+ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_SIGNUP_FIELDS = ['email*']
+ACCOUNT_RATE_LIMITS = {
+    'login_failed': {'max_attempts': None, 'timeout': None}
+}
+
+# Configuración de emails
+ACCOUNT_SIGNUP_FIELDS = ['email*']
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https' if USE_NGROK else 'http'
+
+# Desactivar completamente registro y login tradicional
+ACCOUNT_ALLOW_REGISTRATION = False
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_USER_MODEL_EMAIL_FIELD = 'email'
+
+# Configuración para hacer el proceso más directo
+SOCIALACCOUNT_LOGIN_ON_GET = True
+ACCOUNT_ADAPTER = 'a_users.adapters.NoNewUsersAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'a_users.adapters.CustomSocialAccountAdapter'
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+ACCOUNT_LOGIN_ON_PASSWORD_RESET = True
+ACCOUNT_LOGOUT_ON_GET = True
+SOCIALACCOUNT_AUTO_SIGNUP = True
+
+# Bypass completo del formulario de registro
+SOCIALACCOUNT_FORMS = {}
+SOCIALACCOUNT_STORE_TOKENS = True
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_SIGNUP_FORM_CLASS = None
+ACCOUNT_FORMS = {}
+
+# Configuración de URLs para desarrollo
+if USE_NGROK:
+    # Si estamos usando ngrok, configurar el dominio dinámicamente
+    SITE_URL = f"https://{LOCAL_DOMAIN}"
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+else:
+    # En desarrollo local normal
+    SITE_URL = f"http://{LOCAL_DOMAIN}"
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
+
+# Configuración del sitio
+SITE_ID = 1
+
+# Configuración específica de Google OAuth
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': [
@@ -85,18 +160,17 @@ SOCIALACCOUNT_PROVIDERS = {
         ],
         'AUTH_PARAMS': {
             'access_type': 'online',
+            'prompt': 'select_account'
         },
         'APP': {
             'client_id': SOCIAL_AUTH_GOOGLE_CLIENT_ID,
             'secret': SOCIAL_AUTH_GOOGLE_SECRET,
             'key': ''
-        }
+        },
+        'VERIFIED_EMAIL': True,
+        'OAUTH_PKCE_ENABLED': True,
     }
 }
-
-LOGIN_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/dashboard/'
-ACCOUNT_LOGOUT_REDIRECT_URL = '/'
 
 AUTH_USER_MODEL = 'a_users.User'
 
@@ -215,5 +289,3 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',
     ],
 }
-
-SOCIALACCOUNT_ADAPTER = 'usuarios.adapters.CustomSocialAccountAdapter'
