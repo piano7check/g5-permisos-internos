@@ -16,8 +16,27 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import TemplateView
+from django.contrib.auth.decorators import login_required
+from a_core.views import HomeView
 
 urlpatterns = [
+    # Admin
     path('admin/', admin.site.urls),
-    path('', include('usuarios.urls')),
+    
+    # Autenticación
+    path('accounts/', include('allauth.urls')),
+    
+    # Apps del proyecto
+    path('users/', include('a_users.urls')),
+    path('permissions/', include('a_permissions.urls')),
+    path('security/', include('a_security.urls')),
+    
+    # Página principal
+    path('', HomeView.as_view(), name='home'),
 ]
+
+# Personalizar títulos del admin
+admin.site.site_header = 'Administración del Sistema de Permisos'
+admin.site.site_title = 'Admin Permisos'
+admin.site.index_title = 'Panel de Administración'
