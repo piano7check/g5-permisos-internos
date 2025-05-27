@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Historial de Permisos - Sistema de Permisos{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-history me-2"></i>
+            Historial de Permisos
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if permissions %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Residente</th>
+                        <th>Fecha Solicitud</th>
+                        <th>Período</th>
+                        <th>Estado</th>
+                        <th>Encargado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for permission in permissions %}
+                    <tr>
+                        <td>
+                            <div>{{ permission.resident.get_full_name }}</div>
+                            <small class="text-muted">{{ permission.resident.email }}</small>
+                        </td>
+                        <td>{{ permission.created_at|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            <div>Inicio: {{ permission.start_date|date:"d/m/Y H:i" }}</div>
+                            <div>Fin: {{ permission.end_date|date:"d/m/Y H:i" }}</div>
+                        </td>
+                        <td>
+                            <span class="badge {% if permission.status == 'APPROVED' %}bg-success{% elif permission.status == 'REJECTED' %}bg-danger{% else %}bg-warning{% endif %}">
+                                {{ permission.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if permission.approver %}
+                            {{ permission.approver.get_full_name }}
+                            <div><small class="text-muted">{{ permission.approval_date|date:"d/m/Y H:i" }}</small></div>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'permissions:detail' permission.id %}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+            <p class="text-muted">No hay permisos en el historial.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

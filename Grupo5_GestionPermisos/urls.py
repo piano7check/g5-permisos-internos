@@ -16,8 +16,33 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import RedirectView
+from django.shortcuts import redirect
+from a_core.views import HomeView
 
 urlpatterns = [
+    # Admin
     path('admin/', admin.site.urls),
-    path('', include('usuarios.urls')),
+    
+    # Autenticación - Redirigir todo a Google OAuth
+    path('accounts/login/', RedirectView.as_view(url='/accounts/google/login/', permanent=True), name='account_login'),
+    path('accounts/signup/', RedirectView.as_view(url='/accounts/google/login/', permanent=True), name='account_signup'),
+    path('accounts/3rdparty/signup/', RedirectView.as_view(url='/accounts/google/login/', permanent=True)),
+    path('accounts/', include('allauth.urls')),
+    
+    # Redirigir /login/ a /accounts/login/
+    path('login/', lambda request: redirect('account_login', permanent=True)),
+    
+    # Apps del proyecto
+    path('users/', include('a_users.urls')),
+    path('permissions/', include('a_permissions.urls')),
+    path('security/', include('a_security.urls')),
+    
+    # Página principal
+    path('', HomeView.as_view(), name='home'),
 ]
+
+# Personalizar títulos del admin
+admin.site.site_header = 'Administración del Sistema de Permisos'
+admin.site.site_title = 'Admin Permisos'
+admin.site.index_title = 'Panel de Administración'

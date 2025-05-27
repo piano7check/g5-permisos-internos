@@ -1,0 +1,14 @@
+[
+    {
+        "model": "socialaccount.socialapp",
+        "pk": 1,
+        "fields": {
+            "provider": "google",
+            "name": "Google OAuth",
+            "client_id": "{{ client_id }}",
+            "secret": "{{ secret }}",
+            "key": "",
+            "sites": [1]
+        }
+    }
+] 

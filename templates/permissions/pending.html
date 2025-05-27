@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %}Permisos Pendientes - Sistema de Permisos{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-clock me-2"></i>
+            Permisos Pendientes de Aprobación
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if permissions %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Residente</th>
+                        <th>Fecha Solicitud</th>
+                        <th>Período</th>
+                        <th>Motivo</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for permission in permissions %}
+                    <tr>
+                        <td>
+                            <div>{{ permission.resident.get_full_name }}</div>
+                            <small class="text-muted">{{ permission.resident.email }}</small>
+                        </td>
+                        <td>{{ permission.created_at|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            <div>Inicio: {{ permission.start_date|date:"d/m/Y H:i" }}</div>
+                            <div>Fin: {{ permission.end_date|date:"d/m/Y H:i" }}</div>
+                        </td>
+                        <td>{{ permission.reason|truncatechars:50 }}</td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="{% url 'permissions:detail' permission.id %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-success" onclick="approvePermission({{ permission.id }})">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="rejectPermission({{ permission.id }})">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+            <p class="text-muted">No hay permisos pendientes de aprobación.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal de Rechazo -->
+<div class="modal fade" id="rejectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Rechazar Permiso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="rejectForm" method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="rejection_reason" class="form-label">Motivo del Rechazo</label>
+                        <textarea class="form-control" id="rejection_reason" name="rejection_reason" rows="3" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" onclick="submitReject()">Confirmar Rechazo</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentPermissionId = null;
+    const rejectModal = new bootstrap.Modal(document.getElementById('rejectModal'));
+
+    function approvePermission(permissionId) {
+        if (confirm('¿Estás seguro de que deseas aprobar este permiso?')) {
+            fetch(`/permissions/${permissionId}/approve/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+            }).then(response => {
+                if (response.ok) {
+                    location.reload();
+                }
+            });
+        }
+    }
+
+    function rejectPermission(permissionId) {
+        currentPermissionId = permissionId;
+        rejectModal.show();
+    }
+
+    function submitReject() {
+        const reason = document.getElementById('rejection_reason').value;
+        if (!reason) {
+            alert('Por favor, ingresa el motivo del rechazo');
+            return;
+        }
+
+        fetch(`/permissions/${currentPermissionId}/reject/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+            body: JSON.stringify({ rejection_reason: reason })
+        }).then(response => {
+            if (response.ok) {
+                rejectModal.hide();
+                location.reload();
+            }
+        });
+    }
+</script>
+{% endblock %} 

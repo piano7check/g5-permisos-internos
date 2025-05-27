@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Detalle de Permiso - Sistema de Permisos{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Botón de regreso -->
+            <div class="mb-3">
+                <a href="{% url 'security:register_access' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    Volver a la lista
+                </a>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-file-alt me-2"></i>
+                        Detalle de Permiso
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Información del Residente -->
+                    <div class="mb-4">
+                        <h6 class="border-bottom pb-2 mb-3">Información del Residente</h6>
+                        <p><strong>Nombre:</strong> {{ permission.resident.get_full_name }}</p>
+                        <p><strong>Email:</strong> {{ permission.resident.email }}</p>
+                        <p><strong>Área:</strong> {{ permission.resident.get_controlled_area_display }}</p>
+                    </div>
+
+                    <!-- Detalles del Permiso -->
+                    <div class="mb-4">
+                        <h6 class="border-bottom pb-2 mb-3">Detalles del Permiso</h6>
+                        <p>
+                            <strong>Estado:</strong>
+                            <span class="badge {% if permission.status == 'APPROVED' %}bg-success{% elif permission.status == 'PENDING' %}bg-warning{% elif permission.status == 'REJECTED' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                {{ permission.get_status_display }}
+                            </span>
+                        </p>
+                        <p><strong>Motivo:</strong> {{ permission.reason }}</p>
+                        <p><strong>Fecha de inicio:</strong> {{ permission.start_date|date:"d/m/Y H:i" }}</p>
+                        <p><strong>Fecha de fin:</strong> {{ permission.end_date|date:"d/m/Y H:i" }}</p>
+                    </div>
+
+                    <!-- Último Acceso -->
+                    <div class="mb-4">
+                        <h6 class="border-bottom pb-2 mb-3">Último Acceso</h6>
+                        {% if last_access %}
+                        <p>
+                            <strong>Tipo:</strong>
+                            <span class="badge {% if last_access.access_type == 'ENTRY' %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ last_access.get_access_type_display }}
+                            </span>
+                        </p>
+                        <p><strong>Fecha y hora:</strong> {{ last_access.timestamp|date:"d/m/Y H:i" }}</p>
+                        {% if last_access.notes %}
+                        <p><strong>Observaciones:</strong> {{ last_access.notes }}</p>
+                        {% endif %}
+                        {% else %}
+                        <p class="text-muted">No hay registros de acceso</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Botones de Acción -->
+                    {% if permission.status == 'APPROVED' %}
+                    <div class="d-grid">
+                        {% if not last_access or last_access.access_type == 'EXIT' %}
+                        <button type="button" class="btn btn-success record-access" 
+                                data-permission-id="{{ permission.id }}" 
+                                data-access-type="ENTRY">
+                            <i class="fas fa-sign-in-alt me-2"></i>
+                            Registrar Entrada
+                        </button>
+                        {% else %}
+                        <button type="button" class="btn btn-danger record-access" 
+                                data-permission-id="{{ permission.id }}" 
+                                data-access-type="EXIT">
+                            <i class="fas fa-sign-out-alt me-2"></i>
+                            Registrar Salida
+                        </button>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/security.js' %}"></script>
+{% endblock %} 

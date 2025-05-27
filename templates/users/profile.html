@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% block title %}Mi Perfil - Sistema de Permisos{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-user-circle me-2"></i>
+                    Mi Perfil
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.first_name.id_for_label }}" class="form-label">{{ form.first_name.label }}</label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.first_name.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.last_name.id_for_label }}" class="form-label">{{ form.last_name.label }}</label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.last_name.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.phone.id_for_label }}" class="form-label">{{ form.phone.label }}</label>
+                            {{ form.phone }}
+                            {% if form.phone.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.phone.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.gender.id_for_label }}" class="form-label">{{ form.gender.label }}</label>
+                            {{ form.gender }}
+                            {% if form.gender.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.gender.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted">Email:</label>
+                            <p class="form-control-plaintext">{{ user.email }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted">Rol:</label>
+                            <p class="form-control-plaintext">{{ user.get_role_display }}</p>
+                        </div>
+                    </div>
+
+                    {% if user.is_residente or user.is_encargado %}
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Área:</label>
+                        <p class="form-control-plaintext">{{ user.get_controlled_area_display }}</p>
+                    </div>
+                    {% endif %}
+
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>
+                            Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if user.is_residente %}
+        <!-- Estadísticas de Permisos -->
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>
+                    Estadísticas de Permisos
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <div class="p-3">
+                            <h3 class="text-primary">{{ total_permissions|default:0 }}</h3>
+                            <p class="text-muted mb-0">Total de Permisos</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3">
+                            <h3 class="text-success">{{ approved_permissions|default:0 }}</h3>
+                            <p class="text-muted mb-0">Permisos Aprobados</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3">
+                            <h3 class="text-warning">{{ pending_permissions|default:0 }}</h3>
+                            <p class="text-muted mb-0">Permisos Pendientes</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.avatar-circle {
+    width: 120px;
+    height: 120px;
+    background-color: #f8f9fa;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+</style>
+{% endblock %} 

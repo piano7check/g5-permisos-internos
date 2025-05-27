@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Inicio - Sistema de Permisos{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        {% if not user.is_authenticated %}
+        <!-- Mensaje de bienvenida para usuarios no autenticados -->
+        <div class="text-center mb-4">
+            <h1 class="display-4">Bienvenido al Sistema de Permisos</h1>
+            <p class="lead">
+                Para solicitar un permiso, necesitas iniciar sesión con tu cuenta institucional.
+            </p>
+            <a href="{% url 'account_login' %}" class="btn btn-primary btn-lg">
+                <i class="fab fa-google me-2"></i>
+                Iniciar Sesión con Google
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- Formulario de Solicitud de Permiso -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-file-signature me-2"></i>
+                    Solicitud de Permiso
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if user.is_authenticated and user.is_residente %}
+                <form method="post" action="{% url 'permissions:request' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="reason" class="form-label">Motivo del Permiso</label>
+                        <textarea class="form-control" id="reason" name="reason" rows="3" required></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="start_date" class="form-label">Fecha y Hora de Inicio</label>
+                                <input type="datetime-local" class="form-control" id="start_date" name="start_date" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="end_date" class="form-label">Fecha y Hora de Fin</label>
+                                <input type="datetime-local" class="form-control" id="end_date" name="end_date" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-1"></i>
+                            Enviar Solicitud
+                        </button>
+                    </div>
+                </form>
+                {% else %}
+                <div class="text-center py-4">
+                    {% if not user.is_authenticated %}
+                    <p class="text-muted">
+                        Debes iniciar sesión para solicitar un permiso.
+                    </p>
+                    {% else %}
+                    <p class="text-muted">
+                        Solo los residentes pueden solicitar permisos.
+                    </p>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Establecer fecha mínima como hoy
+    const today = new Date().toISOString().split('T')[0];
+    document.querySelectorAll('input[type="datetime-local"]').forEach(input => {
+        input.min = today + 'T00:00';
+    });
+
+    // Validar que la fecha de fin sea posterior a la de inicio
+    document.getElementById('end_date').addEventListener('change', function() {
+        const startDate = document.getElementById('start_date').value;
+        const endDate = this.value;
+        
+        if (startDate && endDate && startDate > endDate) {
+            alert('La fecha de fin debe ser posterior a la fecha de inicio');
+            this.value = '';
+        }
+    });
+</script>
+{% endblock %} 

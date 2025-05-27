@@ -1,0 +1,64 @@
+/* Estilos para las tarjetas de permisos */
+.permission-card {
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+.permission-card:hover {
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+}
+
+/* Estilos para los estados de permisos */
+.status-badge {
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Estilos para el formulario de solicitud */
+.reason-textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Estilos para la línea de tiempo */
+.timeline {
+    position: relative;
+    padding: 1rem 0;
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 2.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: #dee2e6;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -0.5rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background-color: #fff;
+    border: 2px solid #007bff;
+}
+
+/* Estilos para el modal de rechazo */
+.rejection-modal .modal-header {
+    background-color: #dc3545;
+    color: white;
+}
+
+.rejection-modal .modal-footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+} 

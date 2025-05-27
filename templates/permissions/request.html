@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Solicitar Permiso{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Solicitar Permiso</h4>
+                </div>
+                <div class="card-body">
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <h5>Por favor corrige los siguientes errores:</h5>
+                        <ul>
+                            {% for field, errors in form.errors.items %}
+                            <li>{{ field|title }}: {{ errors|join:", " }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-1"></i>
+                                Enviar Solicitud
+                            </button>
+                            <a href="{% url 'permissions:my_permissions' %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i>
+                                Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Establecer fecha mínima como hoy
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const minDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+
+    document.querySelectorAll('input[type="datetime-local"]').forEach(input => {
+        input.min = minDateTime;
+    });
+
+    // Validar que la fecha de fin sea posterior a la de inicio
+    const startDateInput = document.getElementById('id_start_date');
+    const endDateInput = document.getElementById('id_end_date');
+
+    function validateDates() {
+        if (startDateInput.value && endDateInput.value) {
+            const startDate = new Date(startDateInput.value);
+            const endDate = new Date(endDateInput.value);
+            const now = new Date();
+
+            if (startDate < now) {
+                alert('La fecha de inicio debe ser posterior a la fecha actual');
+                startDateInput.value = '';
+                return false;
+            }
+
+            if (endDate <= startDate) {
+                alert('La fecha de fin debe ser posterior a la fecha de inicio');
+                endDateInput.value = '';
+                return false;
+            }
+        }
+        return true;
+    }
+
+    startDateInput.addEventListener('change', validateDates);
+    endDateInput.addEventListener('change', validateDates);
+
+    // Validar el formulario antes de enviar
+    document.querySelector('form').addEventListener('submit', function(e) {
+        if (!validateDates()) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %} 

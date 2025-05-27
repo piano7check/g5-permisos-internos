@@ -1,0 +1,339 @@
+/* Estilos para botones de tipo de acceso */
+.btn-check:checked + .btn-outline-success {
+    color: #fff;
+    background-color: #198754;
+    border-color: #198754;
+}
+
+.btn-check:checked + .btn-outline-danger {
+    color: #fff;
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+/* Estilos para la tabla de registros */
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.075);
+    cursor: pointer;
+}
+
+/* Estilos para el toast de notificaciones */
+.toast {
+    min-width: 300px;
+}
+
+.toast-header.bg-success,
+.toast-header.bg-danger {
+    color: white;
+}
+
+/* Estilos para los filtros */
+.filter-form {
+    background-color: #f8f9fa;
+    border-radius: 0.25rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Estilos para badges */
+.badge {
+    font-size: 0.875rem;
+    padding: 0.35em 0.65em;
+}
+
+/* Estilos para la paginación */
+.pagination {
+    margin-bottom: 0;
+}
+
+.page-link {
+    padding: 0.375rem 0.75rem;
+}
+
+.page-link i {
+    font-size: 0.875rem;
+}
+
+/* Estilos generales */
+.table td {
+    vertical-align: middle;
+}
+
+/* Estilos responsive para la tabla */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+    background: #fff;
+}
+
+.mobile-table {
+    width: 100%;
+    min-width: 800px; /* Asegura un ancho mínimo para el contenido */
+}
+
+/* Ajustes específicos para la tabla en móviles */
+@media (max-width: 768px) {
+    .table {
+        font-size: 0.9rem;
+    }
+    
+    .mobile-table td {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .mobile-table .text-wrap {
+        font-size: 0.85rem;
+    }
+
+    .btn-group .btn {
+        padding: 0.25rem 0.5rem;
+    }
+
+    /* Mejora el scroll horizontal */
+    .table-responsive::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .table-responsive::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 3px;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+}
+
+/* Ajustes para pantallas muy pequeñas */
+@media (max-width: 576px) {
+    .mobile-table {
+        font-size: 0.8rem;
+    }
+    
+    .mobile-table td {
+        padding: 0.5rem 0.4rem;
+    }
+    
+    .btn-group .btn {
+        padding: 0.2rem 0.4rem;
+    }
+    
+    .badge {
+        font-size: 0.7rem;
+    }
+
+    .text-truncate {
+        max-width: 120px !important;
+    }
+}
+
+/* Estilos para el acordeón de filtros en móvil */
+.card-header[data-bs-toggle="collapse"] {
+    cursor: pointer;
+}
+
+.card-header[data-bs-toggle="collapse"] .fa-chevron-down {
+    transition: transform 0.3s ease;
+}
+
+.card-header[data-bs-toggle="collapse"][aria-expanded="true"] .fa-chevron-down {
+    transform: rotate(180deg);
+}
+
+/* Mejoras en la visualización de fechas */
+.date-range {
+    font-size: 0.9rem;
+}
+
+.date-range .text-muted {
+    font-size: 0.8rem;
+}
+
+/* Mejoras en la visualización del motivo */
+.text-wrap {
+    white-space: normal;
+    word-break: break-word;
+}
+
+/* Estilos para los botones de acción */
+.btn-group {
+    white-space: nowrap;
+}
+
+/* Ajustes para la paginación */
+.pagination {
+    margin-bottom: 0;
+}
+
+@media (max-width: 576px) {
+    .pagination .page-link {
+        padding: 0.4rem 0.6rem;
+    }
+}
+
+/* Estilos para la tabla responsive */
+.custom-table-container {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.swipe-indicator {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+    padding: 8px;
+    margin-bottom: 10px;
+    text-align: center;
+    color: #666;
+}
+
+.swipe-indicator i {
+    margin-right: 5px;
+    animation: swipeAnimation 1.5s infinite;
+}
+
+@keyframes swipeAnimation {
+    0% { transform: translateX(0); }
+    50% { transform: translateX(10px); }
+    100% { transform: translateX(0); }
+}
+
+/* Columnas fijas */
+.sticky-col {
+    position: sticky;
+    left: 0;
+    background: #fff;
+    z-index: 1;
+    border-right: 1px solid #dee2e6;
+}
+
+.sticky-col-right {
+    position: sticky;
+    right: 0;
+    background: #fff;
+    z-index: 1;
+    border-left: 1px solid #dee2e6;
+}
+
+/* Estilos para la tabla */
+.table td {
+    vertical-align: middle;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.075);
+}
+
+/* Ajustes para la tabla en móviles */
+@media (max-width: 768px) {
+    .mobile-table {
+        margin-bottom: 0;
+    }
+
+    .mobile-table td, 
+    .mobile-table th {
+        white-space: nowrap;
+        min-width: 100px;
+        padding: 0.5rem;
+    }
+
+    .mobile-table td.sticky-col {
+        min-width: 200px;
+        max-width: 200px;
+    }
+
+    .mobile-table td.text-wrap {
+        white-space: normal;
+    }
+
+    .mobile-table .btn-group {
+        display: flex;
+        gap: 4px;
+    }
+
+    .mobile-table .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    /* Sombras para indicar scroll */
+    .table-responsive::before,
+    .table-responsive::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 5px;
+        pointer-events: none;
+        z-index: 2;
+    }
+
+    .table-responsive::before {
+        left: 200px; /* Ancho de la columna fija */
+        background: linear-gradient(to right, rgba(0,0,0,0.1), rgba(0,0,0,0));
+    }
+
+    .table-responsive::after {
+        right: 0;
+        background: linear-gradient(to left, rgba(0,0,0,0.1), rgba(0,0,0,0));
+    }
+}
+
+/* Estilos para el scroll */
+.table-responsive::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Estilos para badges y botones */
+.badge {
+    font-size: 0.875rem;
+    padding: 0.35em 0.65em;
+}
+
+.btn-group {
+    white-space: nowrap;
+}
+
+/* Estilos para la paginación */
+.pagination {
+    margin-bottom: 0;
+    flex-wrap: wrap;
+}
+
+.pagination .page-link {
+    padding: 0.375rem 0.75rem;
+}
+
+@media (max-width: 576px) {
+    .pagination .page-link {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .mobile-table td.sticky-col {
+        min-width: 150px;
+        max-width: 150px;
+    }
+    
+    .text-truncate {
+        max-width: 120px !important;
+    }
+} 

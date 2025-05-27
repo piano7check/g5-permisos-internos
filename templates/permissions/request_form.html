@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link href="{% static 'css/permissions.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block title %}Solicitar Permiso - Sistema de Permisos{% endblock %}
+
+{% block content %}
+// ... existing code ...
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/permissions/request-form.js' %}"></script>
+{% endblock %} 
