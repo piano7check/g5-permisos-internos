@@ -4,7 +4,7 @@ from . import views
 app_name = 'permissions'
 
 urlpatterns = [
-    path('request/', views.PermissionRequestView.as_view(), name='request'),
+    path('request/', views.RequestPermissionView.as_view(), name='request'),
     path('my-permissions/', views.MyPermissionsView.as_view(), name='my_permissions'),
     path('pending/', views.PendingPermissionsView.as_view(), name='pending'),
     path('history/', views.PermissionHistoryView.as_view(), name='history'),

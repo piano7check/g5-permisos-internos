@@ -3,6 +3,8 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.fields import GenericRelation
 from a_audit.models import AuditLog
+from django.utils import timezone
+from a_users.models import User
 
 class Permission(models.Model):
     STATUS_CHOICES = [
@@ -10,10 +12,11 @@ class Permission(models.Model):
         ('APPROVED', 'Aprobado'),
         ('REJECTED', 'Rechazado'),
         ('COMPLETED', 'Completado'),
+        ('CANCELLED', 'Cancelado'),
     ]
     
     resident = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        User,
         on_delete=models.CASCADE,
         related_name='permissions',
         limit_choices_to={'role': 'RESIDENTE'},
@@ -34,14 +37,15 @@ class Permission(models.Model):
     start_date = models.DateTimeField('Fecha de inicio')
     end_date = models.DateTimeField('Fecha de fin')
     status = models.CharField(
-        max_length=20,
+        'Estado',
+        max_length=10,
         choices=STATUS_CHOICES,
         default='PENDING'
     )
     
     # Campos de auditoría
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField('Fecha de creación', auto_now_add=True)
+    updated_at = models.DateTimeField('Fecha de actualización', auto_now=True)
     approval_date = models.DateTimeField(null=True, blank=True)
     rejection_reason = models.TextField('Motivo de rechazo', blank=True)
     
@@ -73,3 +77,25 @@ class Permission(models.Model):
     def save(self, *args, **kwargs):
         self.clean()
         super().save(*args, **kwargs)
+
+    @classmethod
+    def has_active_permission(cls, resident):
+        """
+        Verifica si un residente tiene un permiso activo (pendiente o aprobado y no vencido)
+        """
+        now = timezone.now()
+        return cls.objects.filter(
+            resident=resident,
+            status__in=['PENDING', 'APPROVED'],
+            end_date__gt=now
+        ).exists()
+
+    def is_active(self):
+        """
+        Verifica si el permiso está activo (no completado, no cancelado, no rechazado y no vencido)
+        """
+        now = timezone.now()
+        return (
+            self.status in ['PENDING', 'APPROVED'] and
+            self.end_date > now
+        )

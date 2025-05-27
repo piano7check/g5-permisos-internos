@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import TemplateView, ListView, DetailView, View, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import JsonResponse
@@ -7,20 +7,47 @@ from django.contrib import messages
 from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView
 from .models import Permission
+from .forms import PermissionForm
 import json
 from django.db.models import Q
 
 # Create your views here.
 
-class PermissionRequestView(LoginRequiredMixin, CreateView):
+class RequestPermissionView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Permission
+    form_class = PermissionForm
     template_name = 'permissions/request.html'
-    fields = ['reason', 'start_date', 'end_date']
     success_url = reverse_lazy('permissions:my_permissions')
+
+    def test_func(self):
+        return self.request.user.role == 'RESIDENTE'
+
+    def get(self, request, *args, **kwargs):
+        # Verificar si ya tiene un permiso activo
+        if Permission.has_active_permission(request.user):
+            messages.error(
+                request,
+                'Ya tienes un permiso activo. Debes esperar a que se complete para solicitar uno nuevo.'
+            )
+            return redirect('permissions:my_permissions')
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        # Verificar nuevamente al enviar el formulario
+        if Permission.has_active_permission(request.user):
+            messages.error(
+                request,
+                'Ya tienes un permiso activo. Debes esperar a que se complete para solicitar uno nuevo.'
+            )
+            return redirect('permissions:my_permissions')
+        return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
         form.instance.resident = self.request.user
-        messages.success(self.request, 'Tu solicitud de permiso ha sido enviada.')
+        messages.success(
+            self.request,
+            'Tu solicitud de permiso ha sido enviada y está pendiente de aprobación.'
+        )
         return super().form_valid(form)
 
 class MyPermissionsView(LoginRequiredMixin, ListView):

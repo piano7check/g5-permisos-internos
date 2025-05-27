@@ -1,0 +1,29 @@
+.filter-section {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.25rem;
+    margin-bottom: 1rem;
+}
+
+.filter-title {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.filter-list {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+}
+
+.filter-list li {
+    margin-bottom: 0.25rem;
+}
+
+.filter-list .form-check {
+    margin-bottom: 0.25rem;
+}
+
+.filter-list .badge {
+    margin-left: 0.5rem;
+} 

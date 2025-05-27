@@ -17,6 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import RedirectView
+from django.shortcuts import redirect
 from a_core.views import HomeView
 
 urlpatterns = [
@@ -28,6 +29,9 @@ urlpatterns = [
     path('accounts/signup/', RedirectView.as_view(url='/accounts/google/login/', permanent=True), name='account_signup'),
     path('accounts/3rdparty/signup/', RedirectView.as_view(url='/accounts/google/login/', permanent=True)),
     path('accounts/', include('allauth.urls')),
+    
+    # Redirigir /login/ a /accounts/login/
+    path('login/', lambda request: redirect('account_login', permanent=True)),
     
     # Apps del proyecto
     path('users/', include('a_users.urls')),

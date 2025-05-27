@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from django.views.generic import TemplateView, ListView, View
+from django.views.generic import TemplateView, ListView, View, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import JsonResponse
 from django.utils import timezone
@@ -9,6 +9,7 @@ from a_users.models import User
 from a_permissions.models import Permission
 import json
 from django.db import models
+from datetime import datetime, timedelta
 
 # Create your views here.
 
@@ -23,45 +24,85 @@ class RegisterAccessView(LoginRequiredMixin, UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         queryset = Permission.objects.all().select_related('resident')
+        
+        # Obtener fecha y hora actual
+        now = timezone.now()
+        today = now.date()
+        today_start = timezone.make_aware(datetime.combine(today, datetime.min.time()))
+        today_end = timezone.make_aware(datetime.combine(today, datetime.max.time()))
 
-        # Filtro por estado
-        status = self.request.GET.get('status')
-        if status in ['PENDING', 'APPROVED', 'REJECTED', 'COMPLETED']:
-            queryset = queryset.filter(status=status)
+        # Obtener los filtros seleccionados
+        selected_statuses = self.request.GET.getlist('status')
+        selected_areas = self.request.GET.getlist('area')
+        date_filter = self.request.GET.get('date_filter', 'all')
+
+        # Aplicar filtros de estado
+        if selected_statuses:
+            queryset = queryset.filter(status__in=selected_statuses)
         else:
-            # Por defecto mostrar los permisos activos y pendientes
+            # Si no hay estados seleccionados, mostrar solo aprobados y vigentes
             queryset = queryset.filter(
-                Q(status='APPROVED') |
-                Q(status='PENDING'),
-                start_date__lte=timezone.now() + timezone.timedelta(days=1),  # Incluir permisos que empiezan en las próximas 24 horas
-                end_date__gte=timezone.now()  # Solo permisos que no han expirado
+                status='APPROVED',
+                start_date__lte=now,
+                end_date__gte=now
             )
 
-        # Filtro por área (opcional)
-        area = self.request.GET.get('area')
-        if area in ['MALE', 'FEMALE']:
-            queryset = queryset.filter(resident__controlled_area=area)
+        # Aplicar filtros de área
+        if selected_areas:
+            queryset = queryset.filter(resident__controlled_area__in=selected_areas)
 
-        # Ordenar por estado y fecha
-        return queryset.order_by(
-            models.Case(
-                models.When(status='APPROVED', then=0),
-                models.When(status='PENDING', then=1),
-                models.When(status='COMPLETED', then=2),
-                models.When(status='REJECTED', then=3),
-                default=4,
-                output_field=models.IntegerField(),
-            ),
-            'start_date'
-        )
+        # Aplicar filtros de fecha
+        if date_filter == 'today':
+            # Permisos activos hoy (se cruzan con el día de hoy)
+            queryset = queryset.filter(
+                start_date__lte=today_end,
+                end_date__gte=today_start
+            )
+        elif date_filter == 'tomorrow':
+            # Calcular mañana
+            tomorrow_start = today_start + timedelta(days=1)
+            tomorrow_end = today_end + timedelta(days=1)
+            
+            # Permisos activos mañana
+            queryset = queryset.filter(
+                start_date__lte=tomorrow_end,
+                end_date__gte=tomorrow_start
+            )
+        elif date_filter == 'week':
+            # Calcular fin de semana (7 días desde hoy)
+            week_end = today_end + timedelta(days=7)
+            
+            # Permisos que estarán activos en los próximos 7 días
+            queryset = queryset.filter(
+                start_date__lte=week_end,
+                end_date__gte=today_start
+            )
+
+        # Ordenar por fecha de inicio
+        return queryset.order_by('start_date')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        
+        # Opciones de filtros
         context['status_choices'] = Permission.STATUS_CHOICES
         context['area_choices'] = [
             ('MALE', 'Residencia Varones'),
             ('FEMALE', 'Residencia Mujeres')
         ]
+        context['date_filter_choices'] = [
+            ('today', 'Hoy'),
+            ('tomorrow', 'Mañana'),
+            ('week', 'Esta semana'),
+            ('all', 'Todos')
+        ]
+        
+        # Filtros seleccionados
+        selected_statuses = self.request.GET.getlist('status')
+        # Si no hay estados seleccionados, marcar APPROVED por defecto
+        context['selected_statuses'] = selected_statuses if selected_statuses else ['APPROVED']
+        context['selected_areas'] = self.request.GET.getlist('area')
+        context['selected_date_filter'] = self.request.GET.get('date_filter', 'all')
         
         # Obtener el último registro de acceso para cada permiso
         permissions_with_access = {}
@@ -84,9 +125,11 @@ class AccessHistoryView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         return self.request.user.role == 'SEGURIDAD'
 
     def get_queryset(self):
-        queryset = AccessRecord.objects.filter(
-            resident__controlled_area=self.request.user.controlled_area
-        ).select_related('resident', 'security_guard', 'permission')
+        queryset = AccessRecord.objects.all().select_related(
+            'resident', 
+            'security_guard', 
+            'permission'
+        )
 
         # Filtros por fecha
         date_from = self.request.GET.get('date_from')
@@ -106,14 +149,20 @@ class AccessHistoryView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         if resident_id:
             queryset = queryset.filter(resident_id=resident_id)
 
+        # Filtro por área
+        area = self.request.GET.get('area')
+        if area in ['MALE', 'FEMALE']:
+            queryset = queryset.filter(resident__controlled_area=area)
+
         return queryset.order_by('-timestamp')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['residents'] = User.objects.filter(
-            role='RESIDENTE',
-            controlled_area=self.request.user.controlled_area
-        )
+        context['residents'] = User.objects.filter(role='RESIDENTE')
+        context['area_choices'] = [
+            ('MALE', 'Residencia Varones'),
+            ('FEMALE', 'Residencia Mujeres')
+        ]
         return context
 
 class RecordAccessView(LoginRequiredMixin, UserPassesTestMixin, View):
@@ -170,3 +219,19 @@ class RecordAccessView(LoginRequiredMixin, UserPassesTestMixin, View):
                 'status': 'error',
                 'message': str(e)
             }, status=500)
+
+class PermissionDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+    template_name = 'security/permission_detail.html'
+    model = Permission
+    context_object_name = 'permission'
+
+    def test_func(self):
+        return self.request.user.role == 'SEGURIDAD'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Obtener el último registro de acceso
+        context['last_access'] = AccessRecord.objects.filter(
+            permission=self.object
+        ).order_by('-timestamp').first()
+        return context

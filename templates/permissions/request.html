@@ -1,58 +1,43 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
 
-{% block title %}Solicitar Permiso - Sistema de Permisos{% endblock %}
+{% block title %}Solicitar Permiso{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-file-signature me-2"></i>
-                    Solicitar Permiso
-                </h5>
-            </div>
-            <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Solicitar Permiso</h4>
+                </div>
+                <div class="card-body">
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <h5>Por favor corrige los siguientes errores:</h5>
+                        <ul>
+                            {% for field, errors in form.errors.items %}
+                            <li>{{ field|title }}: {{ errors|join:", " }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
                     
-                    <div class="mb-3">
-                        <label for="reason" class="form-label">Motivo del Permiso</label>
-                        <textarea class="form-control" id="reason" name="reason" rows="3" required></textarea>
-                        <div class="form-text">Describe brevemente el motivo por el que necesitas el permiso.</div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="start_date" class="form-label">Fecha y Hora de Inicio</label>
-                                <input type="datetime-local" class="form-control" id="start_date" name="start_date" required>
-                            </div>
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-1"></i>
+                                Enviar Solicitud
+                            </button>
+                            <a href="{% url 'permissions:my_permissions' %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i>
+                                Cancelar
+                            </a>
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="end_date" class="form-label">Fecha y Hora de Fin</label>
-                                <input type="datetime-local" class="form-control" id="end_date" name="end_date" required>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Tu solicitud será revisada por el encargado de tu área. Te notificaremos por correo electrónico cuando haya una respuesta.
-                    </div>
-
-                    <div class="text-end">
-                        <a href="{% url 'home' %}" class="btn btn-light me-2">
-                            <i class="fas fa-times me-1"></i>
-                            Cancelar
-                        </a>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-paper-plane me-1"></i>
-                            Enviar Solicitud
-                        </button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -61,21 +46,54 @@
 
 {% block extra_js %}
 <script>
+document.addEventListener('DOMContentLoaded', function() {
     // Establecer fecha mínima como hoy
-    const today = new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const minDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+
     document.querySelectorAll('input[type="datetime-local"]').forEach(input => {
-        input.min = today + 'T00:00';
+        input.min = minDateTime;
     });
 
     // Validar que la fecha de fin sea posterior a la de inicio
-    document.getElementById('end_date').addEventListener('change', function() {
-        const startDate = document.getElementById('start_date').value;
-        const endDate = this.value;
-        
-        if (startDate && endDate && startDate > endDate) {
-            alert('La fecha de fin debe ser posterior a la fecha de inicio');
-            this.value = '';
+    const startDateInput = document.getElementById('id_start_date');
+    const endDateInput = document.getElementById('id_end_date');
+
+    function validateDates() {
+        if (startDateInput.value && endDateInput.value) {
+            const startDate = new Date(startDateInput.value);
+            const endDate = new Date(endDateInput.value);
+            const now = new Date();
+
+            if (startDate < now) {
+                alert('La fecha de inicio debe ser posterior a la fecha actual');
+                startDateInput.value = '';
+                return false;
+            }
+
+            if (endDate <= startDate) {
+                alert('La fecha de fin debe ser posterior a la fecha de inicio');
+                endDateInput.value = '';
+                return false;
+            }
+        }
+        return true;
+    }
+
+    startDateInput.addEventListener('change', validateDates);
+    endDateInput.addEventListener('change', validateDates);
+
+    // Validar el formulario antes de enviar
+    document.querySelector('form').addEventListener('submit', function(e) {
+        if (!validateDates()) {
+            e.preventDefault();
         }
     });
+});
 </script>
 {% endblock %} 

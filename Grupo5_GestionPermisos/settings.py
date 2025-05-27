@@ -71,6 +71,8 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'crispy_forms',
+    'crispy_bootstrap5',
     
     # Local apps
     'a_core.apps.ACoreConfig',
@@ -83,8 +85,8 @@ INSTALLED_APPS = [
 SITE_ID = 1
 
 AUTHENTICATION_BACKENDS = [
-    'allauth.account.auth_backends.AuthenticationBackend',
     'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
 # Configuración de Google OAuth
@@ -92,17 +94,20 @@ SOCIAL_AUTH_GOOGLE_CLIENT_ID = os.getenv('SOCIAL_AUTH_GOOGLE_CLIENT_ID')
 SOCIAL_AUTH_GOOGLE_SECRET = os.getenv('SOCIAL_AUTH_GOOGLE_SECRET')
 
 # Configuración de sesión y autenticación
-LOGIN_URL = '/login/'
+LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/login/'
+LOGOUT_REDIRECT_URL = '/'
 SESSION_COOKIE_AGE = 1209600  # 2 semanas
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_COOKIE_SECURE = False  # Cambiar a True en producción
 
 # Configuración de allauth
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 SOCIALACCOUNT_AUTO_SIGNUP = True
-SOCIALACCOUNT_EMAIL_REQUIRED = True
+SOCIALACCOUNT_QUERY_EMAIL = True
 
 # Nuevas configuraciones de allauth
 ACCOUNT_LOGIN_METHODS = {'email'}
@@ -114,7 +119,6 @@ ACCOUNT_RATE_LIMITS = {
 # Configuración de emails
 ACCOUNT_SIGNUP_FIELDS = ['email*']
 ACCOUNT_UNIQUE_EMAIL = True
-ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https' if USE_NGROK else 'http'
 
 # Desactivar completamente registro y login tradicional
@@ -129,7 +133,6 @@ SOCIALACCOUNT_ADAPTER = 'a_users.adapters.CustomSocialAccountAdapter'
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 ACCOUNT_LOGIN_ON_PASSWORD_RESET = True
 ACCOUNT_LOGOUT_ON_GET = True
-SOCIALACCOUNT_AUTO_SIGNUP = True
 
 # Bypass completo del formulario de registro
 SOCIALACCOUNT_FORMS = {}
@@ -160,15 +163,7 @@ SOCIALACCOUNT_PROVIDERS = {
         ],
         'AUTH_PARAMS': {
             'access_type': 'online',
-            'prompt': 'select_account'
-        },
-        'APP': {
-            'client_id': SOCIAL_AUTH_GOOGLE_CLIENT_ID,
-            'secret': SOCIAL_AUTH_GOOGLE_SECRET,
-            'key': ''
-        },
-        'VERIFIED_EMAIL': True,
-        'OAUTH_PKCE_ENABLED': True,
+        }
     }
 }
 
@@ -289,3 +284,7 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',
     ],
 }
+
+# Crispy Forms
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
