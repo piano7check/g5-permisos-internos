@@ -37,11 +37,11 @@ urlpatterns = [
     path('users/', include('a_users.urls')),
     path('permissions/', include('a_permissions.urls')),
     path('security/', include('a_security.urls')),
-    
+    #para que me muestre la vista de inicio
     # Página principal
-    path('', HomeView.as_view(), name='home'),
+    #path('', RedirectView.as_view(url='/accounts/login/', permanent=False)),
 ]
-
+#
 # Personalizar títulos del admin
 admin.site.site_header = 'Administración del Sistema de Permisos'
 admin.site.site_title = 'Admin Permisos'
