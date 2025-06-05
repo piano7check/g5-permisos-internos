@@ -99,3 +99,9 @@ class Permission(models.Model):
             self.status in ['PENDING', 'APPROVED'] and
             self.end_date > now
         )
+
+
+#eliminar estos campos 
+
+# start_date = models.DateTimeField('Fecha de inicio')
+# end_date = models.DateTimeField('Fecha de fin')

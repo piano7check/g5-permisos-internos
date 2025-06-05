@@ -26,6 +26,10 @@
                     <form method="post" novalidate>
                         {% csrf_token %}
                         {{ form|crispy }}
+                        <div class="mb-3">
+                            <label for="lugar_salida" class="form-label">Lugar de salida</label>
+                            <input type="text" class="form-control" id="lugar_salida" name="lugar_salida" placeholder="Ej: Puerta principal, portón, etc." required>
+                        </div>
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-paper-plane me-1"></i>
@@ -96,4 +100,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-{% endblock %} 
+{% endblock %}

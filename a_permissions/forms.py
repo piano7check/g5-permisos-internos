@@ -71,3 +71,7 @@ class PermissionForm(forms.ModelForm):
                 self.add_error('end_date', 'El permiso no puede ser por más de 7 días.')
 
         return cleaned_data 
+
+# elimiar estos campos 
+
+# fields = ['resident', 'approver', 'destination', 'reason', 'start_date', 'end_date']
