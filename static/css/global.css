@@ -1,0 +1,77 @@
+/* === BARRA DE NAVEGACIÓN === */
+.navbar {
+    background-color: #2828b5; /* azul intenso */
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    box-shadow: 0 4px 6px rgba(255, 255, 255, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+/* Para que el contenido no pegue en los bordes del navbar */
+.navbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Logo en blanco */
+.navbar-brand span {
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: white;
+}
+
+/* Aquí el "frame blanco" que envuelve las opciones */
+.navbar-links {
+    display: flex;
+    gap: 1rem;
+    background-color: white;      /* fondo blanco */
+    padding: 0.3rem 1rem;         /* espacio adentro */
+    border-radius: 12px;          /* bordes redondeados */
+    box-shadow: 0 0 8px rgba(0,0,0,0.1); /* sombra suave para el marco */
+}
+
+/* Los enlaces dentro del frame blanco */
+.navbar-links a {
+    text-decoration: none;
+    color: #2828b5;               /* texto azul para contraste */
+    font-weight: 600;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    background-color: transparent;
+}
+
+/* Hover para enlaces */
+.navbar-links a:hover,
+.navbar-links a.active {
+    background-color: #2828b5;    /* fondo azul intenso */
+    color: white;                 /* texto blanco */
+    border: 2px solid #2828b5;
+}
+
+/* Estilos para el enlace de LogOut */
+.navbar-links a.logout {
+    color: #fff !important;
+    background-color: #e74c3c !important; /* rojo fuerte */
+    border: 2px solid #e74c3c !important;
+}
+
+.navbar-links a.logout:hover {
+    background-color: #fff !important;
+    color: #e74c3c !important;
+    border: 2px solid #e74c3c !important;
+}
+
+.container {
+    padding: 2rem;
+}

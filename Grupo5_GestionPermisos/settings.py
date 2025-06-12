@@ -20,19 +20,12 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-+y&^ew3rinq1tye=yv^9cwlo$#cs7pus@k4jt*dth5h30=4!op')
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True'
-
-# Configuración de dominio local
-# LOCAL_DOMAIN = os.getenv('LOCAL_DOMAIN', 'localhost:8000')
-# USE_NGROK = os.getenv('USE_NGROK', 'False') == 'True'
 
 ALLOWED_HOSTS = [
     'localhost',
@@ -40,7 +33,6 @@ ALLOWED_HOSTS = [
     '0.0.0.0',
 ]
 
-# Configuración de CSRF
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000',
     'https://localhost:8000',
@@ -48,9 +40,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://127.0.0.1:8000',
 ]
 
-
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -59,7 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-    
+
     # Third party apps
     'rest_framework',
     'allauth',
@@ -68,27 +58,24 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'crispy_forms',
     'crispy_bootstrap5',
-    
+
     # Local apps
     'a_core.apps.ACoreConfig',
     'a_users.apps.AUsersConfig',
     'a_permissions.apps.APermissionsConfig',
     'a_security.apps.ASecurityConfig',
     'a_audit.apps.AAuditConfig',
+    'a_notifications.apps.ANotificationsConfig',
 ]
-
-
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-# Configuración de Google OAuth
 SOCIAL_AUTH_GOOGLE_CLIENT_ID = os.getenv('SOCIAL_AUTH_GOOGLE_CLIENT_ID')
 SOCIAL_AUTH_GOOGLE_SECRET = os.getenv('SOCIAL_AUTH_GOOGLE_SECRET')
 
-# Configuración de sesión y autenticación
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
@@ -96,7 +83,6 @@ SESSION_COOKIE_AGE = 1209600  # 2 semanas
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_SECURE = False  # Cambiar a True en producción
 
-# Configuración de allauth
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
@@ -104,24 +90,20 @@ ACCOUNT_EMAIL_VERIFICATION = 'none'
 SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_QUERY_EMAIL = True
 
-# Nuevas configuraciones de allauth
 ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*']
 ACCOUNT_RATE_LIMITS = {
     'login_failed': {'max_attempts': None, 'timeout': None}
 }
 
-# Configuración de emails
 ACCOUNT_SIGNUP_FIELDS = ['email*']
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
 
-# Desactivar completamente registro y login tradicional
 ACCOUNT_ALLOW_REGISTRATION = False
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_USER_MODEL_EMAIL_FIELD = 'email'
 
-# Configuración para hacer el proceso más directo
 SOCIALACCOUNT_LOGIN_ON_GET = True
 ACCOUNT_ADAPTER = 'a_users.adapters.NoNewUsersAccountAdapter'
 SOCIALACCOUNT_ADAPTER = 'a_users.adapters.CustomSocialAccountAdapter'
@@ -129,25 +111,14 @@ ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 ACCOUNT_LOGIN_ON_PASSWORD_RESET = True
 ACCOUNT_LOGOUT_ON_GET = True
 
-# Bypass completo del formulario de registro
 SOCIALACCOUNT_FORMS = {}
 SOCIALACCOUNT_STORE_TOKENS = True
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_SIGNUP_FORM_CLASS = None
 ACCOUNT_FORMS = {}
 
-# Configuración de URLs para desarrollo
-# if USE_NGROK:
-#     SITE_URL = f"https://{LOCAL_DOMAIN}"
-#     ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
-# else:
-#     SITE_URL = f"http://{LOCAL_DOMAIN}"
-#     ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
-
-# Configuración del sitio
 SITE_ID = 1
 
-# Configuración específica de Google OAuth
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': [
@@ -183,8 +154,6 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'Grupo5_GestionPermisos.urls'
 
-
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -203,10 +172,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Grupo5_GestionPermisos.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -217,10 +182,6 @@ DATABASES = {
         'PORT': os.getenv('DB_PORT', '3306'),
     }
 }
-
-
-# Password validation
-# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -240,28 +201,14 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.1/topics/i18n/
-
 LANGUAGE_CODE = 'es-bo'
-
 TIME_ZONE = 'America/La_Paz'
-
 USE_I18N = True
-
 USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -278,10 +225,8 @@ REST_FRAMEWORK = {
     ],
 }
 
-# Crispy Forms
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-# Deja la configuración local fija:
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
 SITE_URL = 'http://127.0.0.1:8000'

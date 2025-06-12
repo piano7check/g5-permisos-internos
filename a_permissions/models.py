@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models 
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.fields import GenericRelation
@@ -42,6 +42,9 @@ class Permission(models.Model):
         choices=STATUS_CHOICES,
         default='PENDING'
     )
+
+    # Campo para evitar notificaciones duplicadas
+    notified = models.BooleanField(default=False)
     
     # Campos de auditoría
     created_at = models.DateTimeField('Fecha de creación', auto_now_add=True)
