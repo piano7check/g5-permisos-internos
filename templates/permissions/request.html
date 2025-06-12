@@ -30,6 +30,16 @@
                             <label for="lugar_salida" class="form-label">Lugar de salida</label>
                             <input type="text" class="form-control" id="lugar_salida" name="lugar_salida" placeholder="Ej: Puerta principal, portón, etc." required>
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label">Facilitar duración:</label><br>
+                            <div class="btn-group" role="group" aria-label="Facilitación de horas">
+                                <button type="button" class="btn btn-outline-primary facil-btn" data-hours="1">1h</button>
+                                <button type="button" class="btn btn-outline-primary facil-btn" data-hours="2">2h</button>
+                                <button type="button" class="btn btn-outline-primary facil-btn" data-hours="3">3h</button>
+                                <button type="button" class="btn btn-outline-primary facil-btn" data-hours="4">4h</button>
+                                <button type="button" class="btn btn-outline-primary facil-btn" data-hours="5">5h</button>
+                            </div>
+                        </div>
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-paper-plane me-1"></i>
@@ -97,6 +107,34 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!validateDates()) {
             e.preventDefault();
         }
+    });
+
+    // Botones de facilitación para duración de horas 
+    const facilBtns = document.querySelectorAll('.facil-btn');
+    facilBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const hours = parseInt(this.getAttribute('data-hours'));
+            const startInput = document.getElementById('id_start_date');
+            const endInput = document.getElementById('id_end_date');
+            if (!startInput.value) {
+                alert('Primero debes seleccionar la Fecha y Hora de Inicio.');
+                startInput.focus();
+                return;
+            }
+            const startDate = new Date(startInput.value);
+            if (isNaN(startDate.getTime())) {
+                alert('La Fecha y Hora de Inicio no es válida.');
+                startInput.focus();
+                return;
+            }
+            // Sumar las horas seleccionadas
+            const endDate = new Date(startDate.getTime() + hours * 60 * 60 * 1000);
+            // Formatear a yyyy-MM-ddTHH:mm (para input type datetime-local)
+            const pad = n => n.toString().padStart(2, '0');
+            const formatted = `${endDate.getFullYear()}-${pad(endDate.getMonth()+1)}-${pad(endDate.getDate())}T${pad(endDate.getHours())}:${pad(endDate.getMinutes())}`;
+            endInput.value = formatted;
+            endInput.dispatchEvent(new Event('change'));
+        });
     });
 });
 </script>
