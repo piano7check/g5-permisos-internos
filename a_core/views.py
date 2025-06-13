@@ -4,8 +4,23 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from a_permissions.models import Permission
 from a_permissions.forms import PermissionForm
+from django.views import View
 
 # Create your views here.
+
+class HomeRedirectView(View):
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        if user.is_authenticated:
+            if hasattr(user, 'is_encargado') and user.is_encargado:
+                return redirect('permissions:pending')
+            elif hasattr(user, 'is_seguridad') and user.is_seguridad:
+                return redirect('security:register_access')
+            elif hasattr(user, 'is_residente') and user.is_residente:
+                form = PermissionForm()
+                return render(request, 'home.html', {'form': form})
+        # Si no está autenticado, mostrar la página de bienvenida
+        return render(request, 'home.html')
 
 class HomeView(TemplateView):
     template_name = 'home.html'

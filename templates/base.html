@@ -30,20 +30,19 @@
                     {% if user.is_authenticated %}
                         {% if user.is_residente %}
                         <li class="nav-item">
+                            <a class="nav-link" href="/">
+                                <i class="fas fa-home me-1"></i>
+                                Inicio
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="{% url 'permissions:my_permissions' %}">
                                 <i class="fas fa-list-check me-1"></i>
                                 Mis Permisos
                             </a>
                         </li>
                         {% endif %}
-
                         {% if user.is_encargado %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'permissions:pending' %}">
-                                <i class="fas fa-clock me-1"></i>
-                                Permisos Pendientes
-                            </a>
-                        </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'permissions:history' %}">
                                 <i class="fas fa-history me-1"></i>
@@ -51,18 +50,11 @@
                             </a>
                         </li>
                         {% endif %}
-
                         {% if user.is_seguridad %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'security:register_access' %}">
-                                <i class="fas fa-door-open me-1"></i>
-                                Registrar Acceso
-                            </a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link" href="{% url 'security:access_history' %}">
-                                <i class="fas fa-book me-1"></i>
-                                Registro de Accesos
+                                <i class="fas fa-history me-1"></i>
+                                Historial Accesos
                             </a>
                         </li>
                         {% endif %}
@@ -81,23 +73,17 @@
                 <ul class="navbar-nav">
                     {% if user.is_authenticated %}
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user-circle me-1"></i>
-                            {{ user.get_full_name|default:user.email }}
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user me-1"></i> {{ user.get_full_name|default:user.username }}
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li>
-                                <a class="dropdown-item" href="{% url 'users:profile' %}">
-                                    <i class="fas fa-id-card me-1"></i>
-                                    Mi Perfil
-                                </a>
-                            </li>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="{% url 'users:profile' %}"><i class="fas fa-user-cog me-1"></i> Perfil</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <a class="dropdown-item text-danger" href="{% url 'account_logout' %}">
-                                    <i class="fas fa-sign-out-alt me-1"></i>
-                                    Cerrar Sesión
-                                </a>
+                                <form id="logout-form" method="post" action="{% url 'account_logout' %}?next=/">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item"><i class="fas fa-sign-out-alt me-1"></i> Cerrar sesión</button>
+                                </form>
                             </li>
                         </ul>
                     </li>
@@ -145,32 +131,10 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     {% if messages %}
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var djangoMessages = [
-            {% for message in messages %}
-                {
-                    level: "{{ message.tags }}",
-                    text: "{{ message|escapejs }}"
-                }{% if not forloop.last %},{% endif %}
-            {% endfor %}
-        ];
-        djangoMessages.forEach(function(msg) {
-            var icon = 'info';
-            if (msg.level.includes('success')) icon = 'success';
-            else if (msg.level.includes('error')) icon = 'error';
-            else if (msg.level.includes('warning')) icon = 'warning';
-            Swal.fire({
-                icon: icon,
-                title: msg.text,
-                showConfirmButton: false,
-                timer: 2500,
-                position: 'center',
-                toast: false
-            });
-        });
-    });
+    window.djangoMessages = [{% for message in messages %}{level: "{{ message.tags }}", text: "{{ message|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}];
     </script>
     {% endif %}
+    <script src="{% static 'js/alert-messages.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

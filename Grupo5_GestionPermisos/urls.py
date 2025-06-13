@@ -19,12 +19,11 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
-from a_permissions.views import HomeView
+from a_core.views import HomeRedirectView
 
 urlpatterns = [
-
-    path('', HomeView.as_view(), name='home'),
-    path('admin', admin.site.urls),
+    path('', HomeRedirectView.as_view(), name='home'),
+    path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('permissions/', include('a_permissions.urls')),
     path('security/', include('a_security.urls')),
