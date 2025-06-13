@@ -1,19 +1,22 @@
 /* Estilos generales */
-body {
+html, body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    background-color: #003264 !important;
+    color: #fff !important;
 }
 
-main {
-    flex: 1;
-    padding: 2rem 0;
+main, .container, .main.container, .container.py-5 {
+    background: transparent !important;
 }
 
 /* Estilos para cards */
 .card {
     border: none;
     margin-bottom: 1rem;
+    background: #ffffff;
+    color: #003264;
 }
 
 .card-header {
@@ -79,4 +82,34 @@ main {
 
 .shadow-hover:hover {
     box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
-} 
+}
+
+/* Estilos para el navbar */
+.navbar, .navbar.bg-primary, .navbar-dark.bg-primary {
+    background-color: #003264 !important;
+    border-bottom: 2px solid #002040;
+}
+
+.navbar .navbar-brand, .navbar .nav-link, .navbar .dropdown-toggle, .navbar .dropdown-item {
+    color: #fff !important;
+}
+
+.navbar .nav-link.active, .navbar .nav-link:focus, .navbar .nav-link:hover {
+    color: #ffd700 !important;
+}
+
+/* Estilos para el footer */
+.footer, .footer.bg-light {
+    background-color: #003264 !important;
+    color: #fff !important;
+    border-top: 2px solid #002040;
+}
+.footer * {
+    color: #fff !important;
+}
+
+/* Estilos para alertas */
+.alert-info {
+    background: #e3f0ff;
+    color: #003264;
+}

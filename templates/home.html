@@ -5,18 +5,45 @@
 {% block title %}Inicio - Sistema de Permisos{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-file-signature me-2"></i>
-                        Solicitud de Permiso
-                    </h5>
+<div class="container py-5">
+    {% if not user.is_authenticated %}
+        <div class="row justify-content-center mb-4">
+            <div class="col-12 text-center">
+                <img src="{% static 'azul_fondo_tranparente.png' %}" alt="Universidad Adventista de Bolivia - Ingeniería de Sistemas" class="img-fluid w-100 mx-auto mb-4" style="max-width: 600px; height: auto;">
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-6">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center px-2 px-md-4">
+                        <h2 class="mb-3">Bienvenido al Sistema de Permisos</h2>
+                        <p class="lead">Esta plataforma permite a los residentes de la Universidad Adventista de Bolivia gestionar sus solicitudes de permiso de salida y entrada de la Residencia de manera ágil y segura.</p>
+                        <ul class="list-unstyled mb-3 text-start text-md-center">
+                            <li>• Solicita permisos de salida fácilmente.</li>
+                            <li>• Consulta el estado de tus solicitudes.</li>
+                            <li>• Recibe notificaciones sobre la aprobación o rechazo de tus permisos.</li>
+                        </ul>
+                        <div class="alert alert-info mt-3">
+                            <strong>¿Eres residente?</strong> Inicia sesión con tu cuenta institucional para solicitar permisos.<br>
+                        </div>
+                        <a href="{% url 'account_login' %}" class="btn btn-primary mt-2 w-100 w-md-auto">
+                            <i class="fas fa-sign-in-alt me-1"></i> Iniciar Sesión
+                        </a>
+                    </div>
                 </div>
-                <div class="card-body">
-                    {% if user.is_authenticated and user.is_residente %}
+            </div>
+        </div>
+    {% else %}
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-file-signature me-2"></i>
+                            Solicitud de Permiso
+                        </h5>
+                    </div>
+                    <div class="card-body">
                         {% if form.errors %}
                         <div class="alert alert-danger">
                             <h5>Por favor corrige los siguientes errores:</h5>
@@ -27,7 +54,6 @@
                             </ul>
                         </div>
                         {% endif %}
-                        
                         <form method="post" novalidate>
                             {% csrf_token %}
                             {{ form|crispy }}
@@ -38,19 +64,14 @@
                                 </button>
                             </div>
                         </form>
-                    {% else %}
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i>
-                            Por favor inicia sesión como residente para solicitar un permiso.
-                        </div>
-                    {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    {% endif %}
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script src="{% static 'js/permissions/request-form.js' %}"></script>
-{% endblock %} 
+{% endblock %}
