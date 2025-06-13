@@ -8,8 +8,13 @@ from django.utils import timezone
 
 class AccessRecord(models.Model):
     ACCESS_TYPES = [
-        ('ENTRY', 'Entrada'),
         ('EXIT', 'Salida'),
+        ('ENTRY', 'Entrada'),
+    ]
+
+    STATUS_CHOICES = [
+        ('PENDING', 'Pendiente'),
+        ('CONFIRMED', 'Confirmado'),
     ]
 
     resident = models.ForeignKey(
@@ -37,6 +42,13 @@ class AccessRecord(models.Model):
         max_length=5,
         choices=ACCESS_TYPES,
         verbose_name='Tipo de Acceso'
+    )
+
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default='PENDING',
+        verbose_name='Estado'
     )
     
     notes = models.TextField(

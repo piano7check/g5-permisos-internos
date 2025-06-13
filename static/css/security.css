@@ -61,10 +61,11 @@
 
 /* Estilos responsive para la tabla */
 .table-responsive {
+    margin: 0;
+    padding: 0;
+    width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    position: relative;
-    background: #fff;
 }
 
 .mobile-table {
@@ -75,19 +76,75 @@
 /* Ajustes específicos para la tabla en móviles */
 @media (max-width: 768px) {
     .table {
-        font-size: 0.9rem;
+        font-size: 0.875rem;
     }
     
-    .mobile-table td {
-        padding: 0.75rem 0.5rem;
+    .table td, .table th {
+        white-space: nowrap;
+        padding: 0.5rem;
     }
 
-    .mobile-table .text-wrap {
-        font-size: 0.85rem;
+    /* Hacer que las columnas menos importantes sean opcionales en móvil */
+    .table .d-none-mobile {
+        display: none !important;
     }
 
-    .btn-group .btn {
+    /* Ajustar el tamaño de los badges y botones */
+    .badge {
+        font-size: 0.75rem;
+    }
+
+    .btn-sm {
         padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    /* Ajustar el contenedor de filtros */
+    .filter-section {
+        margin-bottom: 1rem;
+    }
+
+    .filter-title {
+        font-size: 0.875rem;
+    }
+
+    .filter-list {
+        padding-left: 1rem;
+    }
+
+    /* Ajustar el contenedor principal */
+    .container-fluid {
+        padding: 0.5rem;
+    }
+
+    /* Ajustar las cards */
+    .card {
+        margin-bottom: 1rem;
+    }
+
+    .card-body {
+        padding: 0.75rem;
+    }
+
+    /* Ajustar los headers de las cards */
+    .card-header {
+        padding: 0.75rem;
+    }
+
+    .card-title {
+        font-size: 1rem;
+        margin-bottom: 0;
+    }
+
+    /* Ajustar los botones de acción */
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .action-buttons .btn {
+        width: 100%;
     }
 
     /* Mejora el scroll horizontal */
@@ -228,112 +285,81 @@
     background-color: rgba(0, 0, 0, 0.075);
 }
 
-/* Ajustes para la tabla en móviles */
-@media (max-width: 768px) {
-    .mobile-table {
-        margin-bottom: 0;
-    }
-
-    .mobile-table td, 
-    .mobile-table th {
-        white-space: nowrap;
-        min-width: 100px;
-        padding: 0.5rem;
-    }
-
-    .mobile-table td.sticky-col {
-        min-width: 200px;
-        max-width: 200px;
-    }
-
-    .mobile-table td.text-wrap {
-        white-space: normal;
-    }
-
-    .mobile-table .btn-group {
-        display: flex;
-        gap: 4px;
-    }
-
-    .mobile-table .btn {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.875rem;
-    }
-
-    /* Sombras para indicar scroll */
-    .table-responsive::before,
-    .table-responsive::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        width: 5px;
-        pointer-events: none;
-        z-index: 2;
-    }
-
-    .table-responsive::before {
-        left: 200px; /* Ancho de la columna fija */
-        background: linear-gradient(to right, rgba(0,0,0,0.1), rgba(0,0,0,0));
-    }
-
-    .table-responsive::after {
-        right: 0;
-        background: linear-gradient(to left, rgba(0,0,0,0.1), rgba(0,0,0,0));
-    }
+/* Estilos para los filtros */
+.filter-section {
+    background-color: #f8f9fa;
+    border-radius: 0.25rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
 }
 
-/* Estilos para el scroll */
-.table-responsive::-webkit-scrollbar {
-    height: 8px;
+.filter-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #495057;
 }
 
-.table-responsive::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
+.filter-list {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
 }
 
-.table-responsive::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 4px;
+.filter-list li {
+    margin-bottom: 0.25rem;
 }
 
-.table-responsive::-webkit-scrollbar-thumb:hover {
-    background: #555;
+/* Estilos para las notificaciones */
+.toast-container {
+    z-index: 1050;
 }
 
-/* Estilos para badges y botones */
+/* Estilos para los badges de estado */
 .badge {
-    font-size: 0.875rem;
+    font-weight: 500;
     padding: 0.35em 0.65em;
 }
 
-.btn-group {
+/* Estilos para los botones de acción */
+.btn-action {
     white-space: nowrap;
 }
 
-/* Estilos para la paginación */
-.pagination {
-    margin-bottom: 0;
-    flex-wrap: wrap;
+/* Estilos para las celdas de la tabla */
+.table-cell-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
 }
 
-.pagination .page-link {
-    padding: 0.375rem 0.75rem;
-}
+/* Estilos para el contenedor de filtros en móvil */
+@media (max-width: 768px) {
+    #filterCollapse {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: white;
+        z-index: 1040;
+        padding: 1rem;
+        overflow-y: auto;
+    }
 
-@media (max-width: 576px) {
-    .pagination .page-link {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.875rem;
+    #filterCollapse.show {
+        display: block;
     }
-    
-    .mobile-table td.sticky-col {
-        min-width: 150px;
-        max-width: 150px;
+
+    .filter-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
     }
-    
-    .text-truncate {
-        max-width: 120px !important;
+
+    .filter-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
     }
 } 

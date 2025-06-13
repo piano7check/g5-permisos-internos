@@ -34,26 +34,23 @@ class CustomUserAdmin(UserAdmin):
     )
     
     readonly_fields = ('last_login', 'date_joined')
+    filter_horizontal = ('groups', 'user_permissions')
     
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = list(super().get_readonly_fields(request, obj))
-        
-        # Si no es superusuario, hacer el campo role de solo lectura
+        # Solo los superusuarios no tienen campos readonly
         if not request.user.is_superuser:
-            readonly_fields.append('role')
-            readonly_fields.append('is_superuser')
-            readonly_fields.append('is_staff')
-            readonly_fields.append('groups')
-            readonly_fields.append('user_permissions')
-        
+            readonly_fields += ['is_superuser', 'is_staff']
         return readonly_fields
-    
+
     def has_change_permission(self, request, obj=None):
-        # Solo permitir editar si es superusuario o si está editando su propio perfil
-        if not obj:
-            return True
-        return request.user.is_superuser or request.user == obj
-    
+        # Permitir a staff editar cualquier usuario excepto superusuarios
+        if obj and obj.is_superuser and not request.user.is_superuser:
+            return False
+        return True
+
     def has_delete_permission(self, request, obj=None):
-        # Solo permitir eliminar si es superusuario
-        return request.user.is_superuser
+        # Permitir a staff eliminar cualquier usuario excepto superusuarios
+        if obj and obj.is_superuser and not request.user.is_superuser:
+            return False
+        return True
