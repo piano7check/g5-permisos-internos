@@ -78,7 +78,7 @@ class RegisterAccessView(LoginRequiredMixin, UserPassesTestMixin, ListView):
                 end_date__gte=today_start
             )
 
-        # Ordenar por fecha de inicio (más recientes primero)
+        # Ordenar por fecha de inicio descendente y luego por creación
         return queryset.order_by('-start_date', '-created_at')
 
     def get_context_data(self, **kwargs):
@@ -119,7 +119,7 @@ class AccessHistoryView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     template_name = 'security/access_history.html'
     model = AccessRecord
     context_object_name = 'access_records'
-    paginate_by = 50
+    paginate_by = 20
 
     def test_func(self):
         return self.request.user.role == 'SEGURIDAD'
@@ -154,7 +154,7 @@ class AccessHistoryView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         if area in ['MALE', 'FEMALE']:
             queryset = queryset.filter(resident__controlled_area=area)
 
-        # Ordenar por fecha y hora (más recientes primero)
+        # Ordenar por timestamp descendente y luego por id
         return queryset.order_by('-timestamp', '-id')
 
     def get_context_data(self, **kwargs):

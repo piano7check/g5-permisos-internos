@@ -184,3 +184,11 @@ class PermissionListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['status_choices'] = Permission.STATUS_CHOICES
         return context
+
+class CancelPermissionView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        permission = get_object_or_404(Permission, pk=pk, resident=request.user, status='PENDING')
+        permission.status = 'CANCELLED'
+        permission.save()
+        messages.success(request, 'El permiso ha sido cancelado correctamente.')
+        return redirect('permissions:my_permissions')

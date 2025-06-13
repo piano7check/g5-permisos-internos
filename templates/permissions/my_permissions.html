@@ -48,6 +48,11 @@
                             <a href="{% url 'permissions:detail' permission.pk %}" class="btn btn-outline-primary btn-sm">
                                 <i class="fas fa-eye"></i>
                             </a>
+                            {% if permission.status == 'PENDING' %}
+                            <button type="button" class="btn btn-outline-danger btn-sm ms-1" onclick="cancelPermission({{ permission.pk }})">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
@@ -61,4 +66,35 @@
         {% endif %}
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+function cancelPermission(permissionId) {
+    Swal.fire({
+        title: '<span style="color:#003366">¿Cancelar este permiso?</span>',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#aaa',
+        confirmButtonText: 'Sí, cancelar',
+        cancelButtonText: 'No',
+        focusCancel: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/permissions/${permissionId}/cancel/`;
+            const csrf = document.createElement('input');
+            csrf.type = 'hidden';
+            csrf.name = 'csrfmiddlewaretoken';
+            csrf.value = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            form.appendChild(csrf);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    });
+}
+</script>
 {% endblock %} 

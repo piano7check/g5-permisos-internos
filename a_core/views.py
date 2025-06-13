@@ -5,6 +5,7 @@ from django.contrib import messages
 from a_permissions.models import Permission
 from a_permissions.forms import PermissionForm
 from django.views import View
+from django.urls import reverse
 
 # Create your views here.
 
@@ -25,9 +26,11 @@ class HomeRedirectView(View):
 class HomeView(TemplateView):
     template_name = 'home.html'
 
-    def get(self, request, *args, **kwargs):
-        # No redirección automática, solo mostrar home
-        return super().get(request, *args, **kwargs)
+    def dispatch(self, request, *args, **kwargs):
+        # Si el usuario está autenticado y no es residente, redirigir a la lógica de redirección por rol
+        if request.user.is_authenticated and not (hasattr(request.user, 'is_residente') and request.user.is_residente):
+            return redirect(reverse('home_redirect'))
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

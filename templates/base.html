@@ -20,7 +20,7 @@
         <div class="container">
             <a class="navbar-brand" href="{% url 'home' %}">
                 <i class="fas fa-building-user me-2"></i>
-                Sistema de Permisos
+                INICIO - Sistema de Permisos
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -132,6 +132,10 @@
     {% if messages %}
     <script>
     window.djangoMessages = [{% for message in messages %}{level: "{{ message.tags }}", text: "{{ message|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}];
+    </script>
+    {% else %}
+    <script>
+    window.djangoMessages = [];
     </script>
     {% endif %}
     <script src="{% static 'js/alert-messages.js' %}"></script>

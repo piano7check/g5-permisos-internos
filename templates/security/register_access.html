@@ -26,10 +26,6 @@
                 </div>
                 <div class="card-body">
                     <div class="collapse d-lg-block" id="filterCollapse">
-                        <div class="filter-header d-lg-none">
-                            <h5 class="mb-0">Filtros</h5>
-                            <button type="button" class="btn-close filter-close" data-bs-dismiss="collapse" data-bs-target="#filterCollapse" aria-label="Close"></button>
-                        </div>
                         <form id="filter-form" method="get">
                             <!-- Estados -->
                             <div class="mb-3">
@@ -120,9 +116,9 @@
                             <thead>
                                 <tr>
                                     <th>Residente</th>
-                                    <th class="d-none-mobile">Área</th>
+                                    <th>Área</th>
                                     <th>Fecha Inicio</th>
-                                    <th class="d-none-mobile">Fecha Fin</th>
+                                    <th>Fecha Fin</th>
                                     <th>Último Acceso</th>
                                     <th>Acciones</th>
                                 </tr>
@@ -131,29 +127,24 @@
                                 {% for permission in permissions %}
                                 <tr>
                                     <td>
-                                        <div class="table-cell-content">
-                                            <div>{{ permission.resident.get_full_name }}</div>
-                                            <small class="text-muted d-lg-none">{{ permission.resident.get_controlled_area_display }}</small>
-                                            <small class="text-muted">{{ permission.resident.email }}</small>
-                                        </div>
+                                        <div>{{ permission.resident.get_full_name }}</div>
+                                        <small class="text-muted">{{ permission.resident.email }}</small>
                                     </td>
-                                    <td class="d-none-mobile">{{ permission.resident.get_controlled_area_display }}</td>
+                                    <td>{{ permission.resident.get_controlled_area_display }}</td>
                                     <td>{{ permission.start_date|date:"d/m/Y H:i" }}</td>
-                                    <td class="d-none-mobile">{{ permission.end_date|date:"d/m/Y H:i" }}</td>
+                                    <td>{{ permission.end_date|date:"d/m/Y H:i" }}</td>
                                     <td>
                                         {% with last_access=last_accesses|get_item:permission.id %}
                                         {% if last_access %}
-                                        <div class="table-cell-content">
-                                            <span class="badge {% if last_access.access_type == 'ENTRY' %}bg-success{% else %}bg-danger{% endif %}">
-                                                {{ last_access.get_access_type_display }}
-                                            </span>
-                                            <small class="text-muted">
-                                                {{ last_access.timestamp|date:"d/m/Y H:i" }}
-                                            </small>
-                                            {% if last_access.status == 'PENDING' %}
-                                            <span class="badge bg-warning">Pendiente</span>
-                                            {% endif %}
-                                        </div>
+                                        <span class="badge {% if last_access.access_type == 'ENTRY' %}bg-success{% else %}bg-danger{% endif %}">
+                                            {{ last_access.get_access_type_display }}
+                                        </span>
+                                        <small class="d-block text-muted">
+                                            {{ last_access.timestamp|date:"d/m/Y H:i" }}
+                                        </small>
+                                        {% if last_access.status == 'PENDING' %}
+                                        <span class="badge bg-warning">Pendiente</span>
+                                        {% endif %}
                                         {% else %}
                                         <span class="text-muted">Sin registros</span>
                                         {% endif %}
@@ -163,14 +154,14 @@
                                         {% with last_access=last_accesses|get_item:permission.id %}
                                         {% if permission.status == 'APPROVED' %}
                                             {% if not last_access %}
-                                            <button type="button" class="btn btn-sm btn-danger record-access" 
+                                            <button type="button" class="btn btn-sm btn-success record-access" 
                                                     data-permission-id="{{ permission.id }}" 
                                                     data-access-type="EXIT">
                                                 <i class="fas fa-sign-out-alt me-1"></i>
                                                 Registrar Salida
                                             </button>
                                             {% elif last_access.access_type == 'EXIT' and last_access.status == 'PENDING' %}
-                                            <button type="button" class="btn btn-sm btn-success record-access" 
+                                            <button type="button" class="btn btn-sm btn-danger record-access" 
                                                     data-permission-id="{{ permission.id }}" 
                                                     data-access-type="ENTRY">
                                                 <i class="fas fa-sign-in-alt me-1"></i>

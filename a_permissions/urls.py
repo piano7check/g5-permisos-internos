@@ -10,5 +10,6 @@ urlpatterns = [
     path('<int:pk>/', views.PermissionDetailView.as_view(), name='detail'),
     path('<int:pk>/approve/', views.ApprovePermissionView.as_view(), name='approve'),
     path('<int:pk>/reject/', views.RejectPermissionView.as_view(), name='reject'),
+    path('<int:pk>/cancel/', views.CancelPermissionView.as_view(), name='cancel'),
     path('list/', views.PermissionListView.as_view(), name='permission_list'),
 ] 

@@ -61,6 +61,13 @@
                         Rechazar
                     </button>
                     {% endif %}
+                    {% if permission.status == 'PENDING' and user == permission.resident %}
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-danger" onclick="cancelPermission({{ permission.pk }})">
+                            <i class="fas fa-times"></i> Cancelar Permiso
+                        </button>
+                    </div>
+                    {% endif %}
                     <a href="{% if user.is_encargado %}{% url 'permissions:pending' %}{% else %}{% url 'permissions:my_permissions' %}{% endif %}" class="btn btn-light">
                         <i class="fas fa-arrow-left me-1"></i>
                         Volver
@@ -174,6 +181,32 @@
                         setTimeout(() => location.reload(), 1500);
                     }
                 });
+            }
+        });
+    }
+
+    function cancelPermission(permissionId) {
+        Swal.fire({
+            title: '<span style="color:#003366">¿Cancelar este permiso?</span>',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#aaa',
+            confirmButtonText: 'Sí, cancelar',
+            cancelButtonText: 'No',
+            focusCancel: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/permissions/${permissionId}/cancel/`;
+                const csrf = document.createElement('input');
+                csrf.type = 'hidden';
+                csrf.name = 'csrfmiddlewaretoken';
+                csrf.value = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                form.appendChild(csrf);
+                document.body.appendChild(form);
+                form.submit();
             }
         });
     }
