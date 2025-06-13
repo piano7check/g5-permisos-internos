@@ -19,9 +19,10 @@ main, .container, .main.container, .container.py-5 {
     color: #003264;
 }
 
-.card-header {
-    background-color: transparent;
-    border-bottom: 1px solid rgba(0,0,0,.125);
+.card-header, .bg-primary, .card-header.bg-primary {
+    background-color: #003264 !important;
+    color: #fff !important;
+    border-bottom: 2px solid #002040;
 }
 
 /* Estilos para botones */
@@ -96,6 +97,32 @@ main, .container, .main.container, .container.py-5 {
 
 .navbar .nav-link.active, .navbar .nav-link:focus, .navbar .nav-link:hover {
     color: #ffd700 !important;
+}
+
+.navbar .dropdown-menu {
+    background-color: #003264 !important;
+    color: #fff !important;
+    border: none;
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
+}
+
+.navbar .dropdown-item {
+    background: transparent !important;
+    color: #fff !important;
+}
+
+.navbar .dropdown-item:focus, .navbar .dropdown-item:hover {
+    background-color: #002040 !important;
+    color: #ffd700 !important;
+}
+
+.navbar .dropdown-item.text-danger {
+    color: #ff4d4f !important;
+}
+
+.navbar .dropdown-item.text-danger:focus, .navbar .dropdown-item.text-danger:hover {
+    background-color: #330000 !important;
+    color: #fff !important;
 }
 
 /* Estilos para el footer */
