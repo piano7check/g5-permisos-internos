@@ -98,50 +98,84 @@
 {% endblock %}
 
 {% block extra_js %}
-{% if user.is_encargado and permission.status == 'PENDING' %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    const rejectModal = new bootstrap.Modal(document.getElementById('rejectModal'));
-
     function approvePermission(permissionId) {
-        if (confirm('¿Estás seguro de que deseas aprobar este permiso?')) {
-            fetch(`/permissions/${permissionId}/approve/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                },
-            }).then(response => {
-                if (response.ok) {
-                    location.reload();
-                }
-            });
-        }
+        Swal.fire({
+            title: '<span style="color:#003366">¿Aprobar este permiso?</span>',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#003366',
+            cancelButtonColor: '#aaa',
+            confirmButtonText: 'Sí, aprobar',
+            cancelButtonText: 'Cancelar',
+            focusConfirm: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/permissions/${permissionId}/approve/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    },
+                }).then(response => {
+                    if (response.ok) {
+                        Swal.fire({
+                            title: '<span style="color:#003366">Permiso aprobado</span>',
+                            icon: 'success',
+                            confirmButtonColor: '#003366',
+                            timer: 1800,
+                            showConfirmButton: false
+                        });
+                        setTimeout(() => location.reload(), 1500);
+                    }
+                });
+            }
+        });
     }
 
     function rejectPermission(permissionId) {
-        rejectModal.show();
-    }
-
-    function submitReject() {
-        const reason = document.getElementById('rejection_reason').value;
-        if (!reason) {
-            alert('Por favor, ingresa el motivo del rechazo');
-            return;
-        }
-
-        fetch(`/permissions/{{ permission.id }}/reject/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        Swal.fire({
+            title: '<span style="color:#003366">Motivo del rechazo</span>',
+            input: 'textarea',
+            inputLabel: 'Por favor, ingresa el motivo del rechazo',
+            inputPlaceholder: 'Motivo...',
+            inputAttributes: {
+                'aria-label': 'Motivo del rechazo'
             },
-            body: JSON.stringify({ rejection_reason: reason })
-        }).then(response => {
-            if (response.ok) {
-                rejectModal.hide();
-                location.reload();
+            showCancelButton: true,
+            confirmButtonColor: '#003366',
+            cancelButtonColor: '#aaa',
+            confirmButtonText: 'Rechazar',
+            cancelButtonText: 'Cancelar',
+            preConfirm: (motivo) => {
+                if (!motivo) {
+                    Swal.showValidationMessage('Debes ingresar un motivo');
+                }
+                return motivo;
+            }
+        }).then((result) => {
+            if (result.isConfirmed && result.value) {
+                fetch(`/permissions/${permissionId}/reject/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ rejection_reason: result.value })
+                }).then(response => {
+                    if (response.ok) {
+                        Swal.fire({
+                            title: '<span style="color:#003366">Permiso rechazado</span>',
+                            icon: 'success',
+                            confirmButtonColor: '#003366',
+                            timer: 1800,
+                            showConfirmButton: false
+                        });
+                        setTimeout(() => location.reload(), 1500);
+                    }
+                });
             }
         });
     }
 </script>
-{% endif %}
 {% endblock %} 

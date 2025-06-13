@@ -12,6 +12,7 @@
     <!-- Base CSS -->
     <link href="{% static 'css/base.css' %}" rel="stylesheet">
     {% block extra_css %}{% endblock %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 </head>
 <body>
     <!-- Navbar -->
@@ -142,6 +143,34 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    {% if messages %}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var djangoMessages = [
+            {% for message in messages %}
+                {
+                    level: "{{ message.tags }}",
+                    text: "{{ message|escapejs }}"
+                }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+        djangoMessages.forEach(function(msg) {
+            var icon = 'info';
+            if (msg.level.includes('success')) icon = 'success';
+            else if (msg.level.includes('error')) icon = 'error';
+            else if (msg.level.includes('warning')) icon = 'warning';
+            Swal.fire({
+                icon: icon,
+                title: msg.text,
+                showConfirmButton: false,
+                timer: 2500,
+                position: 'center',
+                toast: false
+            });
+        });
+    });
+    </script>
+    {% endif %}
     {% block extra_js %}{% endblock %}
 </body>
 </html>

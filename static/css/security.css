@@ -61,8 +61,6 @@
 
 /* Estilos responsive para la tabla */
 .table-responsive {
-    margin: 0;
-    padding: 0;
     width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -75,8 +73,17 @@
 
 /* Ajustes específicos para la tabla en móviles */
 @media (max-width: 768px) {
+    table {
+        font-size: 0.95rem;
+    }
+    .table-responsive {
+        margin-bottom: 1rem;
+    }
+    th, td {
+        white-space: nowrap;
+    }
     .table {
-        font-size: 0.875rem;
+        min-width: 600px;
     }
     
     .table td, .table th {
