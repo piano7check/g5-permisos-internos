@@ -30,6 +30,7 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-+y&^ew3rinq1tye=yv^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True'
 
+
 # Configuración de dominio local y ngrok desde .env
 LOCAL_DOMAIN = os.getenv('LOCAL_DOMAIN', 'localhost:8000')
 USE_NGROK = os.getenv('USE_NGROK', 'False') == 'True'
@@ -65,6 +66,27 @@ else:
     SITE_URL = f'http://{LOCAL_DOMAIN}'
     ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
 
+# Configuración de dominio local
+# LOCAL_DOMAIN = os.getenv('LOCAL_DOMAIN', 'localhost:8000')
+# USE_NGROK = os.getenv('USE_NGROK', 'False') == 'True'
+# LOCAL_DOMAIN = os.getenv('LOCAL_DOMAIN', 'localhost:8000')
+# USE_NGROK = os.getenv('USE_NGROK', 'False') == 'True'
+
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '0.0.0.0',
+]
+
+# Configuración de CSRF
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:8000',
+    'https://localhost:8000',
+    'http://127.0.0.1:8000',
+    'https://127.0.0.1:8000',
+]
+
+
 
 # Application definition
 
@@ -96,6 +118,7 @@ INSTALLED_APPS = [
 
 
 
+
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
@@ -110,6 +133,7 @@ LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 SESSION_COOKIE_AGE = 1209600  # 2 semanas
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_SECURE = False  # Cambiar a True en producción
 
@@ -131,6 +155,7 @@ ACCOUNT_RATE_LIMITS = {
 # Configuración de emails
 ACCOUNT_SIGNUP_FIELDS = ['email*']
 ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
 
 # Desactivar completamente registro y login tradicional
@@ -154,12 +179,27 @@ ACCOUNT_SIGNUP_FORM_CLASS = None
 ACCOUNT_FORMS = {}
 
 # Configuración de URLs para desarrollo
+
 if USE_NGROK:
     SITE_URL = os.getenv('SITE_URL', 'https://<tu-ngrok-url>.ngrok-free.app')
     ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
 else:
     SITE_URL = 'http://127.0.0.1:8000'
     ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
+
+# if USE_NGROK:
+#     SITE_URL = f"https://{LOCAL_DOMAIN}"
+#     ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+# else:
+#     SITE_URL = f"http://{LOCAL_DOMAIN}"
+#     ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
+# if USE_NGROK:
+#     SITE_URL = f"https://{LOCAL_DOMAIN}"
+#     ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+# else:
+#     SITE_URL = f"http://{LOCAL_DOMAIN}"
+#     ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
+
 
 # Configuración del sitio
 SITE_ID = 1
