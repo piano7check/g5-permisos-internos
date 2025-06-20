@@ -24,7 +24,7 @@ from a_core.views import HomeRedirectView, HomeView
 urlpatterns = [
     path('', HomeView.as_view(), name='home'),
     path('redir/', HomeRedirectView.as_view(), name='home_redirect'),
-    path('admin/', admin.site.urls),
+    path('admin', admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('permissions/', include('a_permissions.urls')),
     path('security/', include('a_security.urls')),

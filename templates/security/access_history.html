@@ -95,7 +95,7 @@
                         <td>{{ record.timestamp|date:"d/m/Y H:i" }}</td>
                         <td class="d-none-mobile">
                             {% if record.permission %}
-                            <a href="{% url 'permissions:detail' record.permission.id %}" class="text-decoration-none">
+                            <a href="{% url 'security:permission_detail' record.permission.id %}" class="text-decoration-none">
                                 <i class="fas fa-file-alt me-1"></i>
                                 Ver Permiso
                             </a>
