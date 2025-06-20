@@ -52,4 +52,314 @@
 
 .page-link i {
     font-size: 0.875rem;
+}
+
+/* Estilos generales */
+.table td {
+    vertical-align: middle;
+}
+
+/* Estilos responsive para la tabla */
+.table-responsive {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.mobile-table {
+    width: 100%;
+    min-width: 800px; /* Asegura un ancho mínimo para el contenido */
+}
+
+/* Ajustes específicos para la tabla en móviles */
+@media (max-width: 768px) {
+    .table {
+        font-size: 0.875rem;
+    }
+    
+    .table td, .table th {
+        white-space: nowrap;
+        padding: 0.5rem;
+    }
+
+    /* Hacer que las columnas menos importantes sean opcionales en móvil */
+    .table .d-none-mobile {
+        display: none !important;
+    }
+
+    /* Ajustar el tamaño de los badges y botones */
+    .badge {
+        font-size: 0.75rem;
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    /* Ajustar el contenedor de filtros */
+    .filter-section {
+        margin-bottom: 1rem;
+    }
+
+    .filter-title {
+        font-size: 0.875rem;
+    }
+
+    .filter-list {
+        padding-left: 1rem;
+    }
+
+    /* Ajustar el contenedor principal */
+    .container-fluid {
+        padding: 0.5rem;
+    }
+
+    /* Ajustar las cards */
+    .card {
+        margin-bottom: 1rem;
+    }
+
+    .card-body {
+        padding: 0.75rem;
+    }
+
+    /* Ajustar los headers de las cards */
+    .card-header {
+        padding: 0.75rem;
+    }
+
+    .card-title {
+        font-size: 1rem;
+        margin-bottom: 0;
+    }
+
+    /* Ajustar los botones de acción */
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .action-buttons .btn {
+        width: 100%;
+    }
+
+    /* Mejora el scroll horizontal */
+    .table-responsive::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .table-responsive::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 3px;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+}
+
+/* Ajustes para pantallas muy pequeñas */
+@media (max-width: 576px) {
+    .mobile-table {
+        font-size: 0.8rem;
+    }
+    
+    .mobile-table td {
+        padding: 0.5rem 0.4rem;
+    }
+    
+    .btn-group .btn {
+        padding: 0.2rem 0.4rem;
+    }
+    
+    .badge {
+        font-size: 0.7rem;
+    }
+
+    .text-truncate {
+        max-width: 120px !important;
+    }
+}
+
+/* Estilos para el acordeón de filtros en móvil */
+.card-header[data-bs-toggle="collapse"] {
+    cursor: pointer;
+}
+
+.card-header[data-bs-toggle="collapse"] .fa-chevron-down {
+    transition: transform 0.3s ease;
+}
+
+.card-header[data-bs-toggle="collapse"][aria-expanded="true"] .fa-chevron-down {
+    transform: rotate(180deg);
+}
+
+/* Mejoras en la visualización de fechas */
+.date-range {
+    font-size: 0.9rem;
+}
+
+.date-range .text-muted {
+    font-size: 0.8rem;
+}
+
+/* Mejoras en la visualización del motivo */
+.text-wrap {
+    white-space: normal;
+    word-break: break-word;
+}
+
+/* Estilos para los botones de acción */
+.btn-group {
+    white-space: nowrap;
+}
+
+/* Ajustes para la paginación */
+.pagination {
+    margin-bottom: 0;
+}
+
+@media (max-width: 576px) {
+    .pagination .page-link {
+        padding: 0.4rem 0.6rem;
+    }
+}
+
+/* Estilos para la tabla responsive */
+.custom-table-container {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.swipe-indicator {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+    padding: 8px;
+    margin-bottom: 10px;
+    text-align: center;
+    color: #666;
+}
+
+.swipe-indicator i {
+    margin-right: 5px;
+    animation: swipeAnimation 1.5s infinite;
+}
+
+@keyframes swipeAnimation {
+    0% { transform: translateX(0); }
+    50% { transform: translateX(10px); }
+    100% { transform: translateX(0); }
+}
+
+/* Columnas fijas */
+.sticky-col {
+    position: sticky;
+    left: 0;
+    background: #fff;
+    z-index: 1;
+    border-right: 1px solid #dee2e6;
+}
+
+.sticky-col-right {
+    position: sticky;
+    right: 0;
+    background: #fff;
+    z-index: 1;
+    border-left: 1px solid #dee2e6;
+}
+
+/* Estilos para la tabla */
+.table td {
+    vertical-align: middle;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.075);
+}
+
+/* Estilos para los filtros */
+.filter-section {
+    background-color: #f8f9fa;
+    border-radius: 0.25rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.filter-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #495057;
+}
+
+.filter-list {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+}
+
+.filter-list li {
+    margin-bottom: 0.25rem;
+}
+
+/* Estilos para las notificaciones */
+.toast-container {
+    z-index: 1050;
+}
+
+/* Estilos para los badges de estado */
+.badge {
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+}
+
+/* Estilos para los botones de acción */
+.btn-action {
+    white-space: nowrap;
+}
+
+/* Estilos para las celdas de la tabla */
+.table-cell-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+/* Estilos para el contenedor de filtros en móvil */
+@media (max-width: 768px) {
+    #filterCollapse {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: white;
+        z-index: 1040;
+        padding: 1rem;
+        overflow-y: auto;
+    }
+
+    #filterCollapse.show {
+        display: block;
+    }
+
+    .filter-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .filter-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+    }
 } 

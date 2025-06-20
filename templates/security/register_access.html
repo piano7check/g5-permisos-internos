@@ -12,7 +12,7 @@
 {% block content %}
 <div class="container-fluid">
     <div class="row">
-        <!-- Filtros - En móviles aparece como acordeón -->
+        <!-- Filtros -->
         <div class="col-lg-3 col-md-12 mb-4">
             <div class="card shadow-sm">
                 <div class="card-header bg-light d-lg-none" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="false">
@@ -24,10 +24,10 @@
                         <i class="fas fa-chevron-down"></i>
                     </div>
                 </div>
-                <div id="filterCollapse" class="collapse show">
-                    <div class="card-body">
-                        <form method="get" id="filter-form">
-                            <!-- Estado -->
+                <div class="card-body">
+                    <div class="collapse d-lg-block" id="filterCollapse">
+                        <form id="filter-form" method="get">
+                            <!-- Estados -->
                             <div class="mb-3">
                                 <div class="filter-title">Estado</div>
                                 <ul class="filter-list">
@@ -46,7 +46,7 @@
                                 </ul>
                             </div>
 
-                            <!-- Área -->
+                            <!-- Áreas -->
                             <div class="mb-3">
                                 <div class="filter-title">Área</div>
                                 <ul class="filter-list">
@@ -105,170 +105,80 @@
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-clipboard-list me-2"></i>
+                        <i class="fas fa-door-open me-2"></i>
                         Registro de Accesos
                     </h5>
                 </div>
                 <div class="card-body">
                     {% if permissions %}
-                    <!-- Vista móvil -->
-                    <div class="d-block d-lg-none">
-                        <div class="list-group">
-                            {% for permission in permissions %}
-                            <a href="{% url 'security:permission_detail' permission.id %}" class="list-group-item list-group-item-action">
-                                <div class="d-flex w-100 justify-content-between align-items-center">
-                                    <div>
-                                        <h6 class="mb-1">{{ permission.resident.get_full_name }}</h6>
-                                        <small class="text-muted d-block">{{ permission.start_date|date:"d/m/Y H:i" }}</small>
-                                    </div>
-                                    <div class="d-flex align-items-center">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Residente</th>
+                                    <th>Área</th>
+                                    <th>Fecha Inicio</th>
+                                    <th>Fecha Fin</th>
+                                    <th>Último Acceso</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for permission in permissions %}
+                                <tr>
+                                    <td>
+                                        <div>{{ permission.resident.get_full_name }}</div>
+                                        <small class="text-muted">{{ permission.resident.email }}</small>
+                                    </td>
+                                    <td>{{ permission.resident.get_controlled_area_display }}</td>
+                                    <td>{{ permission.start_date|date:"d/m/Y H:i" }}</td>
+                                    <td>{{ permission.end_date|date:"d/m/Y H:i" }}</td>
+                                    <td>
+                                        {% with last_access=last_accesses|get_item:permission.id %}
+                                        {% if last_access %}
+                                        <span class="badge {% if last_access.access_type == 'ENTRY' %}bg-success{% else %}bg-danger{% endif %}">
+                                            {{ last_access.get_access_type_display }}
+                                        </span>
+                                        <small class="d-block text-muted">
+                                            {{ last_access.timestamp|date:"d/m/Y H:i" }}
+                                        </small>
+                                        {% if last_access.status == 'PENDING' %}
+                                        <span class="badge bg-warning">Pendiente</span>
+                                        {% endif %}
+                                        {% else %}
+                                        <span class="text-muted">Sin registros</span>
+                                        {% endif %}
+                                        {% endwith %}
+                                    </td>
+                                    <td>
                                         {% with last_access=last_accesses|get_item:permission.id %}
                                         {% if permission.status == 'APPROVED' %}
-                                            {% if not last_access or last_access.access_type == 'EXIT' %}
-                                            <button type="button" class="btn btn-sm btn-success record-access me-2" 
-                                                    data-permission-id="{{ permission.id }}" 
-                                                    data-access-type="ENTRY">
-                                                <i class="fas fa-sign-in-alt"></i>
-                                            </button>
-                                            {% else %}
-                                            <button type="button" class="btn btn-sm btn-danger record-access me-2" 
+                                            {% if not last_access %}
+                                            <button type="button" class="btn btn-sm btn-success record-access" 
                                                     data-permission-id="{{ permission.id }}" 
                                                     data-access-type="EXIT">
-                                                <i class="fas fa-sign-out-alt"></i>
+                                                <i class="fas fa-sign-out-alt me-1"></i>
+                                                Registrar Salida
+                                            </button>
+                                            {% elif last_access.access_type == 'EXIT' and last_access.status == 'PENDING' %}
+                                            <button type="button" class="btn btn-sm btn-danger record-access" 
+                                                    data-permission-id="{{ permission.id }}" 
+                                                    data-access-type="ENTRY">
+                                                <i class="fas fa-sign-in-alt me-1"></i>
+                                                Confirmar Llegada
                                             </button>
                                             {% endif %}
                                         {% endif %}
                                         {% endwith %}
-                                        <span class="badge {% if permission.status == 'APPROVED' %}bg-success{% elif permission.status == 'PENDING' %}bg-warning{% elif permission.status == 'REJECTED' %}bg-danger{% else %}bg-secondary{% endif %}">
-                                            {{ permission.get_status_display }}
-                                        </span>
-                                    </div>
-                                </div>
-                            </a>
-                            {% endfor %}
-                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
-
-                    <!-- Vista desktop -->
-                    <div class="d-none d-lg-block">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                <thead>
-                                    <tr>
-                                        <th>Residente</th>
-                                        <th>Motivo</th>
-                                        <th>Estado</th>
-                                        <th>Fecha</th>
-                                        <th>Último Acceso</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for permission in permissions %}
-                                    <tr>
-                                        <td>
-                                            <div>{{ permission.resident.get_full_name }}</div>
-                                            <small class="text-muted">{{ permission.resident.email }}</small>
-                                        </td>
-                                        <td>
-                                            <div class="text-wrap" style="max-width: 200px;">
-                                                {{ permission.reason }}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="badge {% if permission.status == 'APPROVED' %}bg-success{% elif permission.status == 'PENDING' %}bg-warning{% elif permission.status == 'REJECTED' %}bg-danger{% else %}bg-secondary{% endif %}">
-                                                {{ permission.get_status_display }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div>{{ permission.start_date|date:"d/m/Y H:i" }}</div>
-                                            <small class="text-muted">hasta</small>
-                                            <div>{{ permission.end_date|date:"d/m/Y H:i" }}</div>
-                                        </td>
-                                        <td>
-                                            {% with last_access=last_accesses|get_item:permission.id %}
-                                            {% if last_access %}
-                                            <span class="badge {% if last_access.access_type == 'ENTRY' %}bg-success{% else %}bg-danger{% endif %}">
-                                                {{ last_access.get_access_type_display }}
-                                            </span>
-                                            <small class="d-block text-muted">
-                                                {{ last_access.timestamp|date:"d/m/Y H:i" }}
-                                            </small>
-                                            {% else %}
-                                            <span class="text-muted">Sin registros</span>
-                                            {% endif %}
-                                            {% endwith %}
-                                        </td>
-                                        <td>
-                                            {% with last_access=last_accesses|get_item:permission.id %}
-                                            {% if permission.status == 'APPROVED' %}
-                                                {% if not last_access or last_access.access_type == 'EXIT' %}
-                                                <button type="button" class="btn btn-sm btn-success record-access" 
-                                                        data-permission-id="{{ permission.id }}" 
-                                                        data-access-type="ENTRY">
-                                                    <i class="fas fa-sign-in-alt me-1"></i>
-                                                    Registrar Entrada
-                                                </button>
-                                                {% else %}
-                                                <button type="button" class="btn btn-sm btn-danger record-access" 
-                                                        data-permission-id="{{ permission.id }}" 
-                                                        data-access-type="EXIT">
-                                                    <i class="fas fa-sign-out-alt me-1"></i>
-                                                    Registrar Salida
-                                                </button>
-                                                {% endif %}
-                                            {% endif %}
-                                            {% endwith %}
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Paginación -->
-                    {% if is_paginated %}
-                    <nav aria-label="Navegación de páginas" class="mt-4">
-                        <ul class="pagination justify-content-center flex-wrap">
-                            {% if page_obj.has_previous %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
-                                    <i class="fas fa-angle-double-left"></i>
-                                </a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
-                                    <i class="fas fa-angle-left"></i>
-                                </a>
-                            </li>
-                            {% endif %}
-
-                            <li class="page-item disabled">
-                                <span class="page-link">
-                                    Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
-                                </span>
-                            </li>
-
-                            {% if page_obj.has_next %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
-                                    <i class="fas fa-angle-right"></i>
-                                </a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
-                                    <i class="fas fa-angle-double-right"></i>
-                                </a>
-                            </li>
-                            {% endif %}
-                        </ul>
-                    </nav>
-                    {% endif %}
                     {% else %}
                     <div class="text-center py-4">
-                        <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
-                        <p class="text-muted">No hay permisos que coincidan con los filtros.</p>
+                        <p class="text-muted">No hay permisos para mostrar</p>
                     </div>
                     {% endif %}
                 </div>
@@ -276,27 +186,8 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
 {% block extra_js %}
 <script src="{% static 'js/security.js' %}"></script>
-<script>
-function resetFilters() {
-    // Desmarcar todos los checkboxes excepto APPROVED
-    document.querySelectorAll('input[name="status"]').forEach(checkbox => {
-        checkbox.checked = checkbox.value === 'APPROVED';
-    });
-    
-    // Desmarcar todos los checkboxes de área
-    document.querySelectorAll('input[name="area"]').forEach(checkbox => {
-        checkbox.checked = false;
-    });
-    
-    // Seleccionar "Todos" en el filtro de fecha
-    document.querySelector('input[value="all"]').checked = true;
-    
-    // Enviar el formulario
-    document.getElementById('filter-form').submit();
-}
-</script>
 {% endblock %}
-{% endblock %} 

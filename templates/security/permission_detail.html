@@ -67,19 +67,19 @@
                     <!-- Botones de Acción -->
                     {% if permission.status == 'APPROVED' %}
                     <div class="d-grid">
-                        {% if not last_access or last_access.access_type == 'EXIT' %}
-                        <button type="button" class="btn btn-success record-access" 
-                                data-permission-id="{{ permission.id }}" 
-                                data-access-type="ENTRY">
-                            <i class="fas fa-sign-in-alt me-2"></i>
-                            Registrar Entrada
-                        </button>
-                        {% else %}
+                        {% if not last_access or last_access.access_type == 'ENTRY' %}
                         <button type="button" class="btn btn-danger record-access" 
                                 data-permission-id="{{ permission.id }}" 
                                 data-access-type="EXIT">
                             <i class="fas fa-sign-out-alt me-2"></i>
                             Registrar Salida
+                        </button>
+                        {% else %}
+                        <button type="button" class="btn btn-success record-access" 
+                                data-permission-id="{{ permission.id }}" 
+                                data-access-type="ENTRY">
+                            <i class="fas fa-sign-in-alt me-2"></i>
+                            Registrar Llegada
                         </button>
                         {% endif %}
                     </div>
@@ -93,4 +93,4 @@
 
 {% block extra_js %}
 <script src="{% static 'js/security.js' %}"></script>
-{% endblock %} 
+{% endblock %}

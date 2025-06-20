@@ -29,20 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Mostrar notificación de éxito
                     showNotification('Éxito', data.message, 'success');
                     
-                    // Actualizar el botón según el nuevo tipo de acceso
-                    if (accessType === 'ENTRY') {
-                        button.classList.remove('btn-success');
-                        button.classList.add('btn-danger');
-                        button.dataset.accessType = 'EXIT';
-                        button.innerHTML = '<i class="fas fa-sign-out-alt me-1"></i> Registrar Salida';
-                    } else {
-                        button.classList.remove('btn-danger');
-                        button.classList.add('btn-success');
-                        button.dataset.accessType = 'ENTRY';
-                        button.innerHTML = '<i class="fas fa-sign-in-alt me-1"></i> Registrar Entrada';
-                    }
-
-                    // Si estamos en la vista de lista, actualizar la celda de último acceso
+                    // Actualizar la celda de último acceso
                     const row = button.closest('tr');
                     if (row) {
                         const lastAccessCell = row.querySelector('td:nth-child(5)');
@@ -50,9 +37,23 @@ document.addEventListener('DOMContentLoaded', function() {
                             const badge = accessType === 'ENTRY' ? 
                                 '<span class="badge bg-success">Entrada</span>' : 
                                 '<span class="badge bg-danger">Salida</span>';
+                            const statusBadge = data.record.status === 'Pendiente' ? 
+                                '<span class="badge bg-warning">Pendiente</span>' : '';
                             const now = new Date().toLocaleString('es-BO');
-                            lastAccessCell.innerHTML = `${badge}<small class="d-block text-muted">${now}</small>`;
+                            lastAccessCell.innerHTML = `${badge}<small class="d-block text-muted">${now}</small>${statusBadge}`;
                         }
+                    }
+
+                    // Actualizar el botón según el nuevo estado
+                    if (accessType === 'EXIT') {
+                        // Cambiar a botón de confirmar llegada
+                        button.classList.remove('btn-danger');
+                        button.classList.add('btn-success');
+                        button.dataset.accessType = 'ENTRY';
+                        button.innerHTML = '<i class="fas fa-sign-in-alt me-1"></i> Confirmar Llegada';
+                    } else {
+                        // Ocultar el botón ya que el permiso se completó
+                        button.style.display = 'none';
                     }
 
                     // Si el permiso se completó, recargar la página

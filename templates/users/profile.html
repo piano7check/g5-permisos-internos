@@ -135,4 +135,20 @@
     margin: 0 auto;
 }
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+{% if not user.gender %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    Swal.fire({
+        icon: 'warning',
+        title: '¡Atención!',
+        html: 'Aún no configuraste tu perfil.<br>Debes completar tu <b>género</b> para continuar usando el sistema.',
+        confirmButtonColor: '#003366'
+    });
+});
+</script>
+{% endif %}
 {% endblock %} 

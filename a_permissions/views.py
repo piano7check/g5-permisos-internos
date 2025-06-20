@@ -13,42 +13,40 @@ from django.db.models import Q
 
 # Create your views here.
 
-class RequestPermissionView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
-    model = Permission
-    form_class = PermissionForm
-    template_name = 'permissions/request.html'
-    success_url = reverse_lazy('permissions:my_permissions')
+class HomeView(TemplateView):
+    template_name = 'home.html'
 
-    def test_func(self):
-        return self.request.user.role == 'RESIDENTE'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.user.is_authenticated and self.request.user.is_residente:
+            context['form'] = PermissionForm()
+        return context
 
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
+        if not request.user.is_authenticated or not request.user.is_residente:
+            messages.error(request, 'No tienes permiso para realizar esta acción.')
+            return redirect('home')
+
         # Verificar si ya tiene un permiso activo
         if Permission.has_active_permission(request.user):
             messages.error(
                 request,
                 'Ya tienes un permiso activo. Debes esperar a que se complete para solicitar uno nuevo.'
             )
-            return redirect('permissions:my_permissions')
-        return super().get(request, *args, **kwargs)
+            return redirect('home')
 
-    def post(self, request, *args, **kwargs):
-        # Verificar nuevamente al enviar el formulario
-        if Permission.has_active_permission(request.user):
-            messages.error(
+        form = PermissionForm(request.POST)
+        if form.is_valid():
+            permission = form.save(commit=False)
+            permission.resident = request.user
+            permission.save()
+            messages.success(
                 request,
-                'Ya tienes un permiso activo. Debes esperar a que se complete para solicitar uno nuevo.'
+                'Tu solicitud de permiso ha sido enviada y está pendiente de aprobación.'
             )
             return redirect('permissions:my_permissions')
-        return super().post(request, *args, **kwargs)
-
-    def form_valid(self, form):
-        form.instance.resident = self.request.user
-        messages.success(
-            self.request,
-            'Tu solicitud de permiso ha sido enviada y está pendiente de aprobación.'
-        )
-        return super().form_valid(form)
+        
+        return self.render_to_response({'form': form})
 
 class MyPermissionsView(LoginRequiredMixin, ListView):
     template_name = 'permissions/my_permissions.html'
@@ -186,3 +184,11 @@ class PermissionListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['status_choices'] = Permission.STATUS_CHOICES
         return context
+
+class CancelPermissionView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        permission = get_object_or_404(Permission, pk=pk, resident=request.user, status='PENDING')
+        permission.status = 'CANCELLED'
+        permission.save()
+        messages.success(request, 'El permiso ha sido cancelado correctamente.')
+        return redirect('permissions:my_permissions')

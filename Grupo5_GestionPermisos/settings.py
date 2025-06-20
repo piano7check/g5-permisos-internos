@@ -30,6 +30,42 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-+y&^ew3rinq1tye=yv^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True'
 
+
+# Configuración de dominio local y ngrok desde .env
+LOCAL_DOMAIN = os.getenv('LOCAL_DOMAIN', 'localhost:8000')
+USE_NGROK = os.getenv('USE_NGROK', 'False') == 'True'
+NGROK_URL = os.getenv('NGROK_URL', None)
+
+if USE_NGROK and NGROK_URL:
+    ALLOWED_HOSTS = ['*']
+    CSRF_TRUSTED_ORIGINS = [
+        f'https://{NGROK_URL}',
+        f'http://{NGROK_URL}',
+        'http://localhost:8000',
+        'https://localhost:8000',
+        'http://127.0.0.1:8000',
+        'https://127.0.0.1:8000',
+    ]
+    SITE_URL = f'https://{NGROK_URL}'
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+else:
+    ALLOWED_HOSTS = [
+        'localhost',
+        '127.0.0.1',
+        '0.0.0.0',
+        LOCAL_DOMAIN.split(':')[0],
+    ]
+    CSRF_TRUSTED_ORIGINS = [
+        f'http://{LOCAL_DOMAIN}',
+        f'https://{LOCAL_DOMAIN}',
+        'http://localhost:8000',
+        'https://localhost:8000',
+        'http://127.0.0.1:8000',
+        'https://127.0.0.1:8000',
+    ]
+    SITE_URL = f'http://{LOCAL_DOMAIN}'
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
+
 # Configuración de dominio local
 # LOCAL_DOMAIN = os.getenv('LOCAL_DOMAIN', 'localhost:8000')
 # USE_NGROK = os.getenv('USE_NGROK', 'False') == 'True'
@@ -49,6 +85,7 @@ CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:8000',
     'https://127.0.0.1:8000',
 ]
+
 
 
 # Application definition
@@ -142,6 +179,14 @@ ACCOUNT_SIGNUP_FORM_CLASS = None
 ACCOUNT_FORMS = {}
 
 # Configuración de URLs para desarrollo
+
+if USE_NGROK:
+    SITE_URL = os.getenv('SITE_URL', 'https://<tu-ngrok-url>.ngrok-free.app')
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+else:
+    SITE_URL = 'http://127.0.0.1:8000'
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
+
 # if USE_NGROK:
 #     SITE_URL = f"https://{LOCAL_DOMAIN}"
 #     ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
@@ -154,6 +199,7 @@ ACCOUNT_FORMS = {}
 # else:
 #     SITE_URL = f"http://{LOCAL_DOMAIN}"
 #     ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
+
 
 # Configuración del sitio
 SITE_ID = 1
@@ -187,6 +233,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'a_users.middleware.ForceProfileCompletionMiddleware',
     'allauth.account.middleware.AccountMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',

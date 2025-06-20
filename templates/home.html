@@ -1,97 +1,77 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
 
 {% block title %}Inicio - Sistema de Permisos{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        {% if not user.is_authenticated %}
-        <!-- Mensaje de bienvenida para usuarios no autenticados -->
-        <div class="text-center mb-4">
-            <h1 class="display-4">Bienvenido al Sistema de Permisos</h1>
-            <p class="lead">
-                Para solicitar un permiso, necesitas iniciar sesión con tu cuenta institucional.
-            </p>
-            <a href="{% url 'account_login' %}" class="btn btn-primary btn-lg">
-                <i class="fab fa-google me-2"></i>
-                Iniciar Sesión con Google
-            </a>
-        </div>
-        {% endif %}
-
-        <!-- Formulario de Solicitud de Permiso -->
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-file-signature me-2"></i>
-                    Solicitud de Permiso
-                </h5>
+<div class="container py-5">
+    {% if not user.is_authenticated %}
+        <div class="row justify-content-center mb-4">
+            <div class="col-12 text-center">
+                <img src="{% static 'azul_fondo_tranparente.png' %}" alt="Universidad Adventista de Bolivia - Ingeniería de Sistemas" class="img-fluid w-100 mx-auto mb-4" style="max-width: 600px; height: auto;">
             </div>
-            <div class="card-body">
-                {% if user.is_authenticated and user.is_residente %}
-                <form method="post" action="{% url 'permissions:request' %}">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label for="reason" class="form-label">Motivo del Permiso</label>
-                        <textarea class="form-control" id="reason" name="reason" rows="3" required></textarea>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="start_date" class="form-label">Fecha y Hora de Inicio</label>
-                                <input type="datetime-local" class="form-control" id="start_date" name="start_date" required>
-                            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-6">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center px-2 px-md-4">
+                        <h2 class="mb-3">Bienvenido al Sistema de Permisos</h2>
+                        <p class="lead">Esta plataforma permite a los residentes de la Universidad Adventista de Bolivia gestionar sus solicitudes de permiso de salida y entrada de la Residencia de manera ágil y segura.</p>
+                        <ul class="list-unstyled mb-3 text-start text-md-center">
+                            <li>• Solicita permisos de salida fácilmente.</li>
+                            <li>• Consulta el estado de tus solicitudes.</li>
+                            <li>• Recibe notificaciones sobre la aprobación o rechazo de tus permisos.</li>
+                        </ul>
+                        <div class="alert alert-info mt-3">
+                            <strong>¿Eres residente?</strong> Inicia sesión con tu cuenta institucional para solicitar permisos.<br>
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="end_date" class="form-label">Fecha y Hora de Fin</label>
-                                <input type="datetime-local" class="form-control" id="end_date" name="end_date" required>
-                            </div>
-                        </div>
+                        <a href="/accounts/google/login/" class="btn btn-primary mt-2 w-100 w-md-auto">
+                            <i class="fas fa-sign-in-alt me-1"></i> Iniciar Sesión
+                        </a>
                     </div>
-                    <div class="text-end">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-paper-plane me-1"></i>
-                            Enviar Solicitud
-                        </button>
-                    </div>
-                </form>
-                {% else %}
-                <div class="text-center py-4">
-                    {% if not user.is_authenticated %}
-                    <p class="text-muted">
-                        Debes iniciar sesión para solicitar un permiso.
-                    </p>
-                    {% else %}
-                    <p class="text-muted">
-                        Solo los residentes pueden solicitar permisos.
-                    </p>
-                    {% endif %}
                 </div>
-                {% endif %}
             </div>
         </div>
-    </div>
+    {% else %}
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-file-signature me-2"></i>
+                            Solicitud de Permiso
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <h5>Por favor corrige los siguientes errores:</h5>
+                            <ul>
+                                {% for field, errors in form.errors.items %}
+                                <li>{{ field|title }}: {{ errors|join:", " }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                        <form method="post" novalidate>
+                            {% csrf_token %}
+                            {{ form|crispy }}
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane me-1"></i>
+                                    Enviar Solicitud
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script>
-    // Establecer fecha mínima como hoy
-    const today = new Date().toISOString().split('T')[0];
-    document.querySelectorAll('input[type="datetime-local"]').forEach(input => {
-        input.min = today + 'T00:00';
-    });
-
-    // Validar que la fecha de fin sea posterior a la de inicio
-    document.getElementById('end_date').addEventListener('change', function() {
-        const startDate = document.getElementById('start_date').value;
-        const endDate = this.value;
-        
-        if (startDate && endDate && startDate > endDate) {
-            alert('La fecha de fin debe ser posterior a la fecha de inicio');
-            this.value = '';
-        }
-    });
-</script>
-{% endblock %} 
+<script src="{% static 'js/permissions/request-form.js' %}"></script>
+{% endblock %}

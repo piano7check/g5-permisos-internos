@@ -78,8 +78,8 @@ class RegisterAccessView(LoginRequiredMixin, UserPassesTestMixin, ListView):
                 end_date__gte=today_start
             )
 
-        # Ordenar por fecha de inicio
-        return queryset.order_by('start_date')
+        # Ordenar por fecha de inicio descendente y luego por creación
+        return queryset.order_by('-start_date', '-created_at')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -119,7 +119,7 @@ class AccessHistoryView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     template_name = 'security/access_history.html'
     model = AccessRecord
     context_object_name = 'access_records'
-    paginate_by = 50
+    paginate_by = 20
 
     def test_func(self):
         return self.request.user.role == 'SEGURIDAD'
@@ -154,7 +154,8 @@ class AccessHistoryView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         if area in ['MALE', 'FEMALE']:
             queryset = queryset.filter(resident__controlled_area=area)
 
-        return queryset.order_by('-timestamp')
+        # Ordenar por timestamp descendente y luego por id
+        return queryset.order_by('-timestamp', '-id')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -182,34 +183,50 @@ class RecordAccessView(LoginRequiredMixin, UserPassesTestMixin, View):
                 status='APPROVED'
             )
 
+            # Obtener el último registro de acceso
+            last_access = AccessRecord.objects.filter(
+                permission=permission
+            ).order_by('-timestamp').first()
+
+            # Validar la secuencia de entrada/salida
+            if access_type == 'EXIT':
+                # Para salida, verificar que no haya una salida pendiente
+                if last_access and last_access.access_type == 'EXIT' and last_access.status == 'PENDING':
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': 'Ya existe un registro de salida pendiente'
+                    }, status=400)
+            elif access_type == 'ENTRY':
+                # Para entrada, verificar que haya una salida pendiente
+                if not last_access or last_access.access_type != 'EXIT' or last_access.status != 'PENDING':
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': 'No se puede registrar una entrada sin una salida pendiente'
+                    }, status=400)
+
             # Crear el registro de acceso
             access_record = AccessRecord.objects.create(
                 resident=permission.resident,
                 security_guard=request.user,
                 access_type=access_type,
                 notes=notes,
-                permission=permission
+                permission=permission,
+                status='PENDING' if access_type == 'EXIT' else 'CONFIRMED'
             )
 
-            # Si es una entrada y ya había una salida previa, marcar como completado
+            # Si es una entrada confirmada, marcar el permiso como completado
             if access_type == 'ENTRY':
-                previous_exit = AccessRecord.objects.filter(
-                    permission=permission,
-                    access_type='EXIT'
-                ).exists()
-                
-                if previous_exit:
-                    permission.status = 'COMPLETED'
-                    permission.save()
+                permission.status = 'COMPLETED'
+                permission.end_date = access_record.timestamp
+                permission.save()
 
             return JsonResponse({
                 'status': 'success',
-                'message': 'Acceso registrado correctamente',
+                'message': f'Registro de {access_record.get_access_type_display().lower()} exitoso',
                 'record': {
-                    'id': access_record.id,
-                    'resident_name': permission.resident.get_full_name(),
-                    'timestamp': access_record.timestamp.strftime('%d/%m/%Y %H:%M'),
                     'access_type': access_record.get_access_type_display(),
+                    'status': access_record.get_status_display(),
+                    'timestamp': access_record.timestamp.strftime('%d/%m/%Y %H:%M'),
                     'permission_status': permission.status
                 }
             })
@@ -218,7 +235,7 @@ class RecordAccessView(LoginRequiredMixin, UserPassesTestMixin, View):
             return JsonResponse({
                 'status': 'error',
                 'message': str(e)
-            }, status=500)
+            }, status=400)
 
 class PermissionDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     template_name = 'security/permission_detail.html'
